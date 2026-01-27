@@ -1,0 +1,28 @@
+ls
+cd ..
+cd COD7001-Assignment 6
+ls
+cd 'COD7001-Assignment 6'
+ls
+ls > log/output.txt
+history
+quit
+exit
+submit filename
+exit
+submit filename.am
+exit
+submit filename
+exit
+submit filename am
+exit
+exit
+exit
+proc_info
+exit
+proc_info
+exit
+submit filename.txt
+submit new
+proc_info
+exit
