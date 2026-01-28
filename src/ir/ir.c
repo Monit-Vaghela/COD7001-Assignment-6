@@ -6,10 +6,6 @@
 #include "ir.h"
 #include "../parser/ast.h"
 
-/* =====================================================
-   Global compiler state
-   ===================================================== */
-
 static FILE *out;
 
 /* variable → slot mapping */
@@ -21,17 +17,9 @@ typedef struct {
 static var_entry vars[128];
 static int var_count = 0;
 
-/* =====================================================
-   Helper functions
-   ===================================================== */
 
-/* find or assign slot for variable */
 static int get_slot(const char *name)
 {
-    // TODO:
-    // 1. search vars[]
-    // 2. if found → return slot
-    // 3. else create new entry and return new slot
     for(int i=0;i<var_count;i++)
     {
         if(strcmp(vars[i].name, name) == 0)
@@ -46,20 +34,13 @@ static int get_slot(const char *name)
     return var_count-1;
 }
 
-/* emit assembly instruction */
 static void emit(const char *fmt, ...)
 {
-    // TODO:
-    // wrapper around fprintf(out, ...)
     va_list args;
     va_start(args, fmt);
     vfprintf(out, fmt, args);
     va_end(args);
 }
-
-/* =====================================================
-   AST → IR generation
-   ===================================================== */
 
 static void gen(ast_node *node)
 {
@@ -68,20 +49,15 @@ static void gen(ast_node *node)
     switch (node->type)
     {
         case AST_INT:
-            // PUSH value
             emit("PUSH %d\n", node->int_value);
             break;
 
         case AST_IDENT: {
-            // LOAD slot
             int slot = get_slot(node->name);
             emit("LOAD %d\n", slot);
             break;
         }
         case AST_BINOP:
-            // gen(left)
-            // gen(right)
-            // emit ADD / SUB / MUL / DIV
             gen(node->left);
             gen(node->right);   
             switch (node->op) {
@@ -96,9 +72,6 @@ static void gen(ast_node *node)
             break;
 
         case AST_VAR_DECL: {
-            // if initializer:
-            //   gen(expr)
-            //   STORE slot
             int slot = get_slot(node->name);
             if (node->left) {
                 gen(node->left);
@@ -108,15 +81,12 @@ static void gen(ast_node *node)
         }
 
         case AST_ASSIGN: {
-            // gen(expr)
-            // STORE slot
             int slot = get_slot(node->name);
             gen(node->left);
             emit("STORE %d\n", slot);
             break;
         }
         case AST_BLOCK: {
-            // iterate statement list
             ast_node *stmt = node->left;
             while (stmt) {
                 gen(stmt);
@@ -131,9 +101,6 @@ static void gen(ast_node *node)
     }
 }
 
-/* =====================================================
-   Entry point
-   ===================================================== */
 
 void generate_ir(ast_node *root)
 {
