@@ -8,7 +8,13 @@
 
 static FILE *out;
 
-/* variable → slot mapping */
+static int label_id = 0;
+
+static int new_label() {
+    return label_id++;
+}
+
+// variable → slot mapping 
 typedef struct {
     char *name;
     int slot;
@@ -60,16 +66,40 @@ static void gen(ast_node *node)
         case AST_BINOP:
             gen(node->left);
             gen(node->right);   
+            
             switch (node->op) {
+
                 case '+': emit("ADD\n"); break;
                 case '-': emit("SUB\n"); break;
                 case '*': emit("MUL\n"); break;
                 case '/': emit("DIV\n"); break;
-                default:
-                    // for > < >= == 
-                    break;
+            
+                case '<': emit("CMP 0\n"); break;
+                case '>': emit("CMP 1\n"); break;
+                case 'L': emit("CMP 2\n"); break;
+                case 'G': emit("CMP 3\n"); break;
+                case 'E': emit("CMP 4\n"); break;
+                case 'N': emit("CMP 5\n"); break;
             }
             break;
+        
+        case AST_WHILE : {
+
+            int start = new_label();
+            int end = new_label();
+
+            emit("L%d:\n", start);
+
+            gen(node->left);
+            emit("JZ L%d\n", end);
+
+            gen(node->right);
+            emit("JMP L%d\n", start);
+
+            emit("L%d:\n", end);
+            
+            break;
+        }
 
         case AST_VAR_DECL: {
             int slot = get_slot(node->name);
@@ -86,10 +116,48 @@ static void gen(ast_node *node)
             emit("STORE %d\n", slot);
             break;
         }
+
+        case AST_IF: {
+            int end = new_label();
+
+            gen(node->left);          // condition
+            emit("JZ L%d\n", end);
+
+            gen(node->right);         // then block
+            emit("L%d:\n", end);
+            break;
+        }
+
+        case AST_IF_ELSE: {
+            int else_lbl = new_label();
+            int end_lbl  = new_label();
+
+            gen(node->left);              // condition
+            emit("JZ L%d\n", else_lbl);
+
+            gen(node->right);             // then
+            emit("JMP L%d\n", end_lbl);
+
+            emit("L%d:\n", else_lbl);
+            gen(node->extra);             // else
+
+            emit("L%d:\n", end_lbl);
+            break;
+        }
+
+
         case AST_BLOCK: {
             ast_node *stmt = node->left;
             while (stmt) {
                 gen(stmt);
+
+                // move only through statement list
+                if (stmt->type == AST_IF ||
+                    stmt->type == AST_IF_ELSE ||
+                    stmt->type == AST_WHILE ||
+                    stmt->type == AST_BLOCK)
+                    break;
+
                 stmt = stmt->right;
             }
             break;
