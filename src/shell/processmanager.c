@@ -46,8 +46,12 @@ int proc_list_add(const struct process *p) {
 struct process *proc_list_find(int pid) {
     struct proc_node *head = proc_list;
     while (head) {
-        if (head->proc.pid == pid)
+        // printf("HERE\n");
+        if (head->proc.pid == pid){
+            // printf("returning with pid %d\n", head->proc.pid);
             return &head->proc;
+        }
+        // printf("Current Pid is %d\n", head->proc.pid);
         head = head->next;
     }
     return NULL;

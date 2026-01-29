@@ -1,10 +1,11 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 
-#include "ir.h"
-#include "../parser/ast.h"
+#include "ir/ir.h"
+#include "parser/ast.h"
 
 static FILE *out;
 
@@ -18,27 +19,56 @@ static int new_label() {
 typedef struct {
     char *name;
     int slot;
+    int scope;
 } var_entry;
 
 static var_entry vars[128];
 static int var_count = 0;
 
+static int current_scope = 0;
+static int next_slot = 0;
 
-static int get_slot(const char *name)
+static int lookup_slot(const char *name)
 {
-    for(int i=0;i<var_count;i++)
+    for(int i = var_count - 1;i>=0;i--)
     {
         if(strcmp(vars[i].name, name) == 0)
         {
             return vars[i].slot;
         }
     }
-    vars[var_count].name = strdup(name);
-    vars[var_count].slot = var_count;
-    var_count++;
-
-    return var_count-1;
+    printf("IR error: variable '%s' not found\n", name);
+    exit(1);
 }
+
+static int create_slot(const char *name)
+{
+    vars[var_count].name = strdup(name);
+    vars[var_count].slot = next_slot++;
+    vars[var_count].scope = current_scope;
+    var_count++;
+    
+    return vars[var_count-1].slot;
+}
+
+
+
+
+// static int get_slot(const char *name)
+// {
+//     for(int i=0;i<var_count;i++)
+//     {
+//         if(strcmp(vars[i].name, name) == 0)
+//         {
+//             return vars[i].slot;
+//         }
+//     }
+//     vars[var_count].name = strdup(name);
+//     vars[var_count].slot = var_count;
+//     var_count++;
+
+//     return var_count-1;
+// }
 
 static void emit(const char *fmt, ...)
 {
@@ -59,7 +89,7 @@ static void gen(ast_node *node)
             break;
 
         case AST_IDENT: {
-            int slot = get_slot(node->name);
+            int slot = lookup_slot(node->name);
             emit("LOAD %d\n", slot);
             break;
         }
@@ -102,7 +132,7 @@ static void gen(ast_node *node)
         }
 
         case AST_VAR_DECL: {
-            int slot = get_slot(node->name);
+            int slot = create_slot(node->name);
             if (node->left) {
                 gen(node->left);
                 emit("STORE %d\n", slot);
@@ -111,7 +141,7 @@ static void gen(ast_node *node)
         }
 
         case AST_ASSIGN: {
-            int slot = get_slot(node->name);
+            int slot = lookup_slot(node->name);
             gen(node->left);
             emit("STORE %d\n", slot);
             break;
@@ -147,19 +177,24 @@ static void gen(ast_node *node)
 
 
         case AST_BLOCK: {
+
+            current_scope++;
+
             ast_node *stmt = node->left;
             while (stmt) {
                 gen(stmt);
-
-                // move only through statement list
-                if (stmt->type == AST_IF ||
-                    stmt->type == AST_IF_ELSE ||
-                    stmt->type == AST_WHILE ||
-                    stmt->type == AST_BLOCK)
-                    break;
-
+                
                 stmt = stmt->right;
             }
+
+            while (var_count > 0 &&
+           vars[var_count - 1].scope == current_scope)
+            {
+                var_count--;
+            }
+
+            current_scope--;
+
             break;
         }
 
@@ -172,9 +207,9 @@ static void gen(ast_node *node)
 
 void generate_ir(ast_node *root)
 {
-    out = fopen("out.asm", "w");
+    out = fopen("log/out.asm", "w");
     if (!out) {
-        perror("out.asm");
+        perror("log/out.asm");
         exit(1);
     }
 
@@ -183,3 +218,4 @@ void generate_ir(ast_node *root)
     fprintf(out, "HALT\n");
     fclose(out);
 }
+

@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ast.h"
-
+#include "parser/ast.h"
 
 static ast_node *ast_create_empty_node(ast_node_type type, int line) {
     /*
@@ -159,14 +158,9 @@ ast_node *ast_append_statement(ast_node *list, ast_node *stmt)
 
     ast_node *temp = list;
 
-    while (temp->right)
+    // Keep traversing until we find a node whose right is NULL
+    while (temp->right != NULL)
     {
-        if (temp->type == AST_IF ||
-            temp->type == AST_IF_ELSE ||
-            temp->type == AST_WHILE ||
-            temp->type == AST_BLOCK)
-            break;
-
         temp = temp->right;
     }
 
@@ -238,7 +232,8 @@ void ast_print(ast_node *node, int indent)
 
 /* Traverse statement list ONLY for simple statements */
 if ((node->type == AST_VAR_DECL ||
-     node->type == AST_ASSIGN) &&
+     node->type == AST_ASSIGN || 
+    node->type == AST_BLOCK) &&
     node->right)
 {
     ast_print(node->right, indent);

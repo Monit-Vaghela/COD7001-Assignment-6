@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "symbol_table.h"
+#include "parser/symbol_table.h"
 
 static symbol_t *symtab_head;
 static int curr_scope;
