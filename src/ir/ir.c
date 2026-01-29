@@ -7,12 +7,22 @@
 #include "ir/ir.h"
 #include "parser/ast.h"
 
-static FILE *out;
+static char *ir_buf;
+static int ir_size;
+static int ir_cap;
 
 static int label_id = 0;
 
 static int new_label() {
     return label_id++;
+}
+
+static void ir_init(void)
+{
+    ir_cap = 4096;
+    ir_size = 0;
+    ir_buf = malloc(ir_cap);
+    ir_buf[0] = '\0';
 }
 
 // variable → slot mapping 
@@ -72,11 +82,25 @@ static int create_slot(const char *name)
 
 static void emit(const char *fmt, ...)
 {
+    char temp[256];
     va_list args;
+
     va_start(args, fmt);
-    vfprintf(out, fmt, args);
+    vsnprintf(temp, sizeof(temp), fmt, args);
     va_end(args);
+
+    int len = strlen(temp);
+
+    if (ir_size + len + 1 >= ir_cap) {
+        ir_cap *= 2;
+        ir_buf = realloc(ir_buf, ir_cap);
+    }
+
+    memcpy(ir_buf + ir_size, temp, len);
+    ir_size += len;
+    ir_buf[ir_size] = '\0';
 }
+
 
 static void gen(ast_node *node)
 {
@@ -205,17 +229,22 @@ static void gen(ast_node *node)
 }
 
 
-void generate_ir(ast_node *root)
+char *generate_ir(ast_node *root)
 {
-    out = fopen("log/out.asm", "w");
-    if (!out) {
-        perror("log/out.asm");
-        exit(1);
-    }
-
+    ir_init();
     gen(root);
+    emit("HALT\n");
+    return ir_buf;
+    
+    // out = fopen("log/out.asm", "w");
+    // if (!out) {
+    //     perror("log/out.asm");
+    //     exit(1);
+    // }
 
-    fprintf(out, "HALT\n");
-    fclose(out);
+    // gen(root);
+
+    // fprintf(out, "HALT\n");
+    // fclose(out);
 }
 
