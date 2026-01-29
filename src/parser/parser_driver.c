@@ -34,6 +34,7 @@ int parse_file(const char *filename)
     
     free(ir_code);
     fclose(yyin);
+    generate_ir(ast_root);
 
     return 0;
 }

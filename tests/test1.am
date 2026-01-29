@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 var a = 1;
 
 {
@@ -9,3 +10,11 @@ var a = 1;
 }
 
 a = a + 2;
+=======
+var x = 0;
+var y = 3;
+
+while (x < y) {
+    x = x + 1;
+}
+>>>>>>> 1d4854d (Pipelined parser with shell)
