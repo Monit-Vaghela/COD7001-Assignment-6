@@ -17,6 +17,7 @@ int parse_file(const char *filename)
 
     symtab_init();
     yyparse();
+    ast_print(ast_root, 0);
     fclose(yyin);
 
     return 0;
