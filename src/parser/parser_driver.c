@@ -1,11 +1,7 @@
-#include <stdio.h>
-#include "ast.h"
-#include "symbol_table.h"
+#include "parser/parser_driver.h"
+#include "ir/ir.h"
 
-extern int yyparse(void);
-extern FILE *yyin;
-
-extern  ast_node *ast_root;
+int yyparser(void);
 
 int parse_file(const char *filename)
 {
@@ -19,6 +15,7 @@ int parse_file(const char *filename)
     yyparse();
     ast_print(ast_root, 0);
     fclose(yyin);
+    generate_ir(ast_root);
 
     return 0;
 }

@@ -1,28 +1,32 @@
-ls
-cd ..
-cd COD7001-Assignment 6
-ls
-cd 'COD7001-Assignment 6'
-ls
-ls > log/output.txt
-history
-quit
 exit
-submit filename
+submit tests/test.am
+run 1
 exit
-submit filename.am
+submit tests/test.am
+run 1
 exit
-submit filename
+submit tests/test.am
+run 1
+run 1
 exit
-submit filename am
+submit tests/test.am
+cd a
 exit
-exit
-exit
+submit test/test.am
+submit tests/test.am
+run 0
+run 1
 proc_info
 exit
+submit tests/test.am
+proc_info
+run 1
 proc_info
 exit
-submit filename.txt
-submit new
-proc_info
+submit tests/test2.am
+run 1
+exit
+run tests/test2.am
+submit tests/test2.am
+run 1
 exit

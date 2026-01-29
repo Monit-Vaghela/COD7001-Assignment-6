@@ -1,10 +1,11 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 
-#include "ir.h"
-#include "../parser/ast.h"
+#include "ir/ir.h"
+#include "parser/ast.h"
 
 static FILE *out;
 
@@ -206,9 +207,9 @@ static void gen(ast_node *node)
 
 void generate_ir(ast_node *root)
 {
-    out = fopen("out.asm", "w");
+    out = fopen("log/out.asm", "w");
     if (!out) {
-        perror("out.asm");
+        perror("log/out.asm");
         exit(1);
     }
 
@@ -217,3 +218,4 @@ void generate_ir(ast_node *root)
     fprintf(out, "HALT\n");
     fclose(out);
 }
+

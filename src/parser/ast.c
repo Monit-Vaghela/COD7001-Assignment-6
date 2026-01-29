@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ast.h"
-
+#include "parser/ast.h"
 
 static ast_node *ast_create_empty_node(ast_node_type type, int line) {
     /*
