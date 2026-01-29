@@ -31,16 +31,6 @@ all: myShell
 myShell: $(LEX_C) $(YACC_C)
 	$(CC) $(CFLAGS) $(SRC) $(LEX_C) $(YACC_C) -o myShell
 
-# Build and run IR / assembly pipeline
-assembly: $(LEX_C) $(YACC_C)
-	$(CC) $(CFLAGS) \
-	    src/parser/*.c \
-	    $(YACC_C) \
-	    $(LEX_C) \
-	    src/ir/*.c \
-	    src/test_ir.c \
-	    -o src/test_ir
-
 # Flex
 $(LEX_C): src/parser/lexer.l
 	flex -o $(LEX_C) $<
