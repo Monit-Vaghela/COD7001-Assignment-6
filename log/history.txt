@@ -1,32 +1,32 @@
-exit
-submit tests/test.am
-run 1
-exit
-submit tests/test.am
-run 1
-exit
-submit tests/test.am
-run 1
-run 1
-exit
-submit tests/test.am
-cd a
-exit
-submit test/test.am
-submit tests/test.am
-run 0
-run 1
-proc_info
-exit
-submit tests/test.am
-proc_info
-run 1
-proc_info
-exit
-submit tests/test2.am
 run 1
 exit
 run tests/test2.am
 submit tests/test2.am
 run 1
+exit
+proc_info
+submit tests/test.am
+submit tests/test1.am
+proc_info
+run 1
+exit
+submit tests/test.am
+submit tests/test1.am
+proc_info
+run 1
+proc_info
+submit tests/test2.am
+proc_info
+run 2
+run2
+run 2
+run 1
+run 1
+run 1
+exit
+submit tests/test1.am
+proc_info
+run 1
+clear
+git status
 exit
