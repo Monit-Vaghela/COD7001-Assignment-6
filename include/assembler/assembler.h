@@ -3,6 +3,6 @@
 
 #include "VM/instruction.h"
 
-int assemble(const char *input_file, unsigned char **out_code);
+int assemble(const char *src, unsigned char **out_code);
 
 #endif

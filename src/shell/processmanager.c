@@ -107,7 +107,7 @@ struct process *process_create(const char *program_path) {
 
     p->ast = NULL;
     p->ir = NULL;
-    p->vm_ctx = NULL;
+    p->vm = NULL;
     p->mem_ctx = NULL;
     p->exit_code = 0;
 

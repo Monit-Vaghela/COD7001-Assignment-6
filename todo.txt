@@ -1,0 +1,13 @@
+Monit
+
+1) adding comparision operators
+2) removing all extern variables with static and adding get functions
+3) testing the pipeline with multiple test cases
+4) checking freeing of resources
+5) changing debugger to latch onto my processes
+6) chaning creation running of new processes by fork
+
+Anunay
+
+1) adding debug info after parser
+2) adding logic for new_pair operations 

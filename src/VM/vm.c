@@ -91,16 +91,19 @@ static void print_vm_state(vm *vm, unsigned char opcode){
 }
 
 void vm_init(vm *vm, unsigned char *code, int code_size){
-    printf("Initializing virtual machine\n");
+    // printf("Initializing virtual machine\n");
     vm->code = code;
     vm->code_size = code_size;
     vm->pc = 0;
+    
     vm->running = 1;
-
+    
     stack_init(&vm->stack);
+    
     stack_init(&vm->call_stack);
+    
     memory_init(vm->memory);
-
+    
     for(int i = 0; i < MEM_SIZE; i++)
         mem_initialized[i] = 0;
 }
@@ -109,7 +112,7 @@ void vm_run(vm *vm, int debug, int benchmark) {
     while(vm->running && vm->pc < vm->code_size){
         unsigned char opcode = vm->code[vm->pc];
 
-        if(benchmark) {// instruction_count++;}
+        
         if(debug) print_vm_state(vm, opcode);
         //printf("Current Instruction : %02x\n", current_instr);
 
@@ -170,9 +173,9 @@ void vm_run(vm *vm, int debug, int benchmark) {
                 int c_value;
 
                 if(a.type == VAL_INT && b.type == VAL_INT){
-                    // clock_ t1 = clock();
+                    clock_t t1 = clock();
                     c_value = a.int_value + b.int_value;
-                    // clock_ t2 = clock();
+                    clock_t t2 = clock();
                     // alu_time += (t2 - t1);
                     c = value_int(c_value);
                 }
@@ -196,9 +199,9 @@ void vm_run(vm *vm, int debug, int benchmark) {
                 int c_value;
 
                 if(a.type == VAL_INT && b.type == VAL_INT){
-                    // clock_ t1 = clock();
+                    clock_t t1 = clock();
                     c_value = a.int_value - b.int_value;
-                    // clock_ t2 = clock();
+                    clock_t t2 = clock();
                     // alu_time += (t2 - t1);
 
                     c = value_int(c_value);
@@ -223,9 +226,9 @@ void vm_run(vm *vm, int debug, int benchmark) {
                 int c_value;
 
                 if(a.type == VAL_INT && b.type == VAL_INT){
-                    // clock_ t1 = clock();
+                    clock_t t1 = clock();
                     c_value = a.int_value * b.int_value;
-                    // clock_ t2 = clock();
+                    clock_t t2 = clock();
                     // alu_time += (t2 - t1);
                     c = value_int(c_value);
                 }
@@ -255,9 +258,9 @@ void vm_run(vm *vm, int debug, int benchmark) {
                 int c_value;
 
                 if(a.type == VAL_INT && b.type == VAL_INT){
-                    // clock_ t1 = clock();
+                    clock_t t1 = clock();
                     c_value = a.int_value / b.int_value;
-                    // clock_ t2 = clock();
+                    clock_t t2 = clock();
                     // alu_time += (t2 - t1);
                     c = value_int(c_value);
                 }
@@ -278,16 +281,16 @@ void vm_run(vm *vm, int debug, int benchmark) {
                 Value a = stack_pop(&vm->stack);
                 
                 if(a.type == VAL_INT && b.type == VAL_INT){
-                    // clock_ t1 = clock();
+                    clock_t t1 = clock();
                     Value valObj;
                     valObj.type = VAL_INT;
                     if(a.int_value < b.int_value){
-                        // clock_ t2 = clock();
+                        clock_t t2 = clock();
                         // alu_time += (t2 - t1);
                         valObj.int_value = 1;
                         stack_push(&vm->stack, valObj);
                     }else{
-                        // clock_ t2 = clock();
+                        clock_t t2 = clock();
                         // alu_time += (t2 - t1);
                         valObj.int_value = 0;
                         stack_push(&vm->stack, valObj);
@@ -304,18 +307,18 @@ void vm_run(vm *vm, int debug, int benchmark) {
             }
 
             case JMP:{
-                // clock_ t1 = clock();
+                clock_t t1 = clock();
                 int addr = check_loop(vm, "JMP");
                 if(vm_error_flag != 0) break;
                 if (debug) printf("JUMPING TO %d\n", addr);
                 vm->pc = addr;
-                // clock_ t2 = clock();
+                clock_t t2 = clock();
                 // control_time += (t2 - t1);
                 break;     
             }
 
             case JZ:{
-                // clock_ t1 = clock();
+                clock_t t1 = clock();
                 Value top = stack_pop(&vm->stack);
                 if(top.type == VAL_OBJ){
                     printf("[VM Error / %d]: JZ Only Operates on Integer Values\n", vm->pc);
@@ -338,13 +341,13 @@ void vm_run(vm *vm, int debug, int benchmark) {
                 } else {
                     vm->pc += 5;
                 }
-                // clock_ t2 = clock();
+                clock_t t2 = clock();
                 // control_time += (t2 - t1);
                 break;
             }
 
             case JNZ:{
-                // clock_ t1 = clock();
+                clock_t t1 = clock();
                 Value top = stack_pop(&vm->stack);
 
                 if(top.type == VAL_OBJ){
@@ -368,7 +371,7 @@ void vm_run(vm *vm, int debug, int benchmark) {
                 } else {
                     vm->pc += 5;
                 }
-                // clock_ t2 = clock();
+                clock_t t2 = clock();
                 // control_time += (t2 - t1);
                 break;
             }
@@ -424,7 +427,7 @@ void vm_run(vm *vm, int debug, int benchmark) {
             }
 
             case CALL:{
-                // clock_ t1 = clock();
+                clock_t t1 = clock();
                 int addr = check_next_4byte(vm, "CALL");
                 if(vm_error_flag == 1) break;
 
@@ -443,13 +446,13 @@ void vm_run(vm *vm, int debug, int benchmark) {
                 }
 
                 vm->pc = addr;
-                // clock_ t2 = clock();
+                clock_t t2 = clock();
                 // control_time += (t2 - t1);
                 break;
             }
 
             case RET:{
-                // clock_ t1 = clock();
+                clock_t t1 = clock();
                 Value ret_addr = stack_pop(&vm->call_stack);
                 if(ret_addr.type == VAL_OBJ){
                     printf("[VM Error / %d]: Return Address Cannot be Heap Object\n", vm->pc);
@@ -468,7 +471,7 @@ void vm_run(vm *vm, int debug, int benchmark) {
                     break;
                 }
                 vm->pc = ret_addr.int_value;
-                // clock_ t2 = clock();
+                clock_t t2 = clock();
                 // control_time += (t2 - t1);
                 break;
             }
@@ -778,4 +781,4 @@ void vm_run(vm *vm, int debug, int benchmark) {
     print_vm_state(vm, 0xFF);
     // heap_print(heap_head);
 }
-}
+

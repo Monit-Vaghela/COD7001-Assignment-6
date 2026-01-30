@@ -3,6 +3,7 @@
 
 #include "parser/ast.h"
 
-char *generate_ir(ast_node *root);
+int generate_ir(ast_node *root);
+char *get_ir_buf();
 
 #endif

@@ -4,6 +4,7 @@
 #include "ir/ir.h"
 #include <stdlib.h>
 #include <string.h>
+#include "VM/vm.h"
 
 // Linked list used to store the processes.
 enum proc_state {
@@ -23,7 +24,7 @@ struct process {
     struct ast_node *ast;
     char *ir;
 
-    void *vm_ctx;
+    vm *vm;
     void *mem_ctx;
 
     int exit_code;
@@ -40,4 +41,5 @@ int proc_list_remove(int pid);
 void proc_list_free();
 struct process *process_create(const char *program_path);
 void print_proc_list();
+
 #endif

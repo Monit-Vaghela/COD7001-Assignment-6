@@ -17,6 +17,10 @@ static int new_label() {
     return label_id++;
 }
 
+char *get_ir_buf(){
+    return ir_buf;
+}
+
 static void ir_init(void)
 {
     ir_cap = 4096;
@@ -229,12 +233,12 @@ static void gen(ast_node *node)
 }
 
 
-char *generate_ir(ast_node *root)
+int generate_ir(ast_node *root)
 {
     ir_init();
     gen(root);
     emit("HALT\n");
-    return ir_buf;
+    return 0;
     
     // out = fopen("log/out.asm", "w");
     // if (!out) {

@@ -74,3 +74,61 @@ exit
 submit tests/test1.am
 run 1
 exit
+submit tests/test1.am
+run 1
+submit tests/test2.am
+run 2
+exit
+submit tests/test1.cm
+submit/tests/test1.am
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.an
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+exiyt
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+make clean
+make
+m./myS	
+./hell
+make clean
+make
+.Shell
+exit
+submit test1.am
+submit tests/test1.am
+run 1
+submit tests/test2.am
+run 2
+exit
