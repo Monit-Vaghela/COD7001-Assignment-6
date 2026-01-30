@@ -178,3 +178,11 @@ proc_info
 run 2
 kill 2
 exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test2.am
+run 1
+submit tests/test2.am
+run 2
+exit

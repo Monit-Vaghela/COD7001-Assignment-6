@@ -211,7 +211,12 @@ static void gen(ast_node *node)
             ast_node *stmt = node->left;
             while (stmt) {
                 gen(stmt);
-                
+                if (stmt->type == AST_IF ||
+                    stmt->type == AST_IF_ELSE ||
+                    stmt->type == AST_WHILE ||
+                    stmt->type == AST_BLOCK) {
+                    break;
+                }
                 stmt = stmt->right;
             }
 

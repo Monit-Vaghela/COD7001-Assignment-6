@@ -9,9 +9,104 @@ Monit
 
 Anunay
 
-1) adding debug info after parser
-2) adding logic for new_pair operations 
+1) adding debug info such as line number done after parsing
+2) adding logic for heap allocation
+3) new keywords to be added
+    a) new
+    b) obj
+    c) <obj>.set_left/<obj>.set_right
+    d) <obj>.get_left/<obj>.get_right
+    e) <obj>.remove_left/<obj>.remove_right
+    f) def <functions>(var x, var y)
+    g) print()
+4) example for heap allocation.
+var x = 10
+obj a = new
+a.set_left = x
+
+assembly ->
+push 10
+store 0
+new_pair
+store 1
+load 1
+load 0
+set_left
+-> change symbol table to have an object type.
+
+4) example of print ->
+    print(x) : x can only be integer
+    we will only allow a single integer to be printed
+    PRINT _ _ _ _ -> 32 bit (Assembly key word)
+    
+'5) example for function calling ->
+    def <func name>(input parameters); -> first the user need to declare the function
+    func name (input paramenters){ -? function definition (only once)
+        //body of functions
+    }
+
+    func name(input arguments); -> function Call
+
+    example
+    def add(var x, var y, obj z);
+
+    obj a = new;
+    add(var x, var y, obj z){
+        a.set_left = x + y + z.set_left + z.set_right;
+        return; -> I dont know whether to keep any return type or not
+    }
+
+    var x = 10;
+    var y = 20;
+    obj z = new;
+    z.set_left = 20;
+    z.set_right = 132;
+
+    add(x, y, z);
+
+    print(a.get_right)
+
+assembly
+new_pair
+store 0
+
+push 10
+store 1
+
+push 20
+store 2
+
+new_pair
+store 3
+
+load 3
+push 20
+set_left
+
+push 132
+set_right
+store 3
+
+new_pair
+load 0
+set_left
+
+new_pair
+load 1
+set_left
+
+set_right
+
+make_func L0
+MAKE_CLOSURE
+store 5
+
+load 5
+CALL_CLOSURE
+
+L0;
+// load the env'
 
 
 Doubts 
-1) no need to store the int value back to the address as we have updated the object
+1) no need to store the int value back to the address as we have updated the object(to be done by monit)
