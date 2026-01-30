@@ -68,3 +68,9 @@ run 2
 proc_info
 exut
 exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+exit
