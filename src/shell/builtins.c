@@ -83,7 +83,7 @@ static int kill_process(struct base_command *cmd){
     }
 
     //2) Whatever its state may be, clear all the resources allocated
-    // and the remove from the linked list.
+    proc_list_remove(id);
     return 0;
 }
 

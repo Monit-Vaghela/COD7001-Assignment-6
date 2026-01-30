@@ -275,8 +275,8 @@ void vm_run(vm *vm, int debug, int benchmark) {
                 break;
             }
 
-            case CMP:{
-                if(arithmatic_underflow(vm, "CMP") != 0) break;
+            case LT:{
+                if(arithmatic_underflow(vm, "LT") != 0) break;
                 Value b = stack_pop(&vm->stack);
                 Value a = stack_pop(&vm->stack);
                 
@@ -285,6 +285,130 @@ void vm_run(vm *vm, int debug, int benchmark) {
                     Value valObj;
                     valObj.type = VAL_INT;
                     if(a.int_value < b.int_value){
+                        clock_t t2 = clock();
+                        // alu_time += (t2 - t1);
+                        valObj.int_value = 1;
+                        stack_push(&vm->stack, valObj);
+                    }else{
+                        clock_t t2 = clock();
+                        // alu_time += (t2 - t1);
+                        valObj.int_value = 0;
+                        stack_push(&vm->stack, valObj);
+                    }
+                }
+                else {
+                    printf("[VM ERROR / %d] Arithmetic operation can be applied to Heap Object\n", vm->pc);
+                    vm -> running = 0;
+                    break;
+                }
+
+                (vm->pc)++;
+                break;
+            }
+
+            case GT:{
+                if(arithmatic_underflow(vm, "GT") != 0) break;
+                Value b = stack_pop(&vm->stack);
+                Value a = stack_pop(&vm->stack);
+                
+                if(a.type == VAL_INT && b.type == VAL_INT){
+                    clock_t t1 = clock();
+                    Value valObj;
+                    valObj.type = VAL_INT;
+                    if(a.int_value > b.int_value){
+                        clock_t t2 = clock();
+                        // alu_time += (t2 - t1);
+                        valObj.int_value = 1;
+                        stack_push(&vm->stack, valObj);
+                    }else{
+                        clock_t t2 = clock();
+                        // alu_time += (t2 - t1);
+                        valObj.int_value = 0;
+                        stack_push(&vm->stack, valObj);
+                    }
+                }
+                else {
+                    printf("[VM ERROR / %d] Arithmetic operation can be applied to Heap Object\n", vm->pc);
+                    vm -> running = 0;
+                    break;
+                }
+
+                (vm->pc)++;
+                break;
+            }
+
+            case LTE:{
+                if(arithmatic_underflow(vm, "LTE") != 0) break;
+                Value b = stack_pop(&vm->stack);
+                Value a = stack_pop(&vm->stack);
+                
+                if(a.type == VAL_INT && b.type == VAL_INT){
+                    clock_t t1 = clock();
+                    Value valObj;
+                    valObj.type = VAL_INT;
+                    if(a.int_value <= b.int_value){
+                        clock_t t2 = clock();
+                        // alu_time += (t2 - t1);
+                        valObj.int_value = 1;
+                        stack_push(&vm->stack, valObj);
+                    }else{
+                        clock_t t2 = clock();
+                        // alu_time += (t2 - t1);
+                        valObj.int_value = 0;
+                        stack_push(&vm->stack, valObj);
+                    }
+                }
+                else {
+                    printf("[VM ERROR / %d] Arithmetic operation can be applied to Heap Object\n", vm->pc);
+                    vm -> running = 0;
+                    break;
+                }
+
+                (vm->pc)++;
+                break;
+            }
+
+            case GTE:{
+                if(arithmatic_underflow(vm, "GTE") != 0) break;
+                Value b = stack_pop(&vm->stack);
+                Value a = stack_pop(&vm->stack);
+                
+                if(a.type == VAL_INT && b.type == VAL_INT){
+                    clock_t t1 = clock();
+                    Value valObj;
+                    valObj.type = VAL_INT;
+                    if(a.int_value >= b.int_value){
+                        clock_t t2 = clock();
+                        // alu_time += (t2 - t1);
+                        valObj.int_value = 1;
+                        stack_push(&vm->stack, valObj);
+                    }else{
+                        clock_t t2 = clock();
+                        // alu_time += (t2 - t1);
+                        valObj.int_value = 0;
+                        stack_push(&vm->stack, valObj);
+                    }
+                }
+                else {
+                    printf("[VM ERROR / %d] Arithmetic operation can be applied to Heap Object\n", vm->pc);
+                    vm -> running = 0;
+                    break;
+                }
+
+                (vm->pc)++;
+                break;
+            }
+
+            case EQ:{
+                if(arithmatic_underflow(vm, "EQ") != 0) break;
+                Value b = stack_pop(&vm->stack);
+                Value a = stack_pop(&vm->stack);
+                
+                if(a.type == VAL_INT && b.type == VAL_INT){
+                    clock_t t1 = clock();
+                    Value valObj;
+                    valObj.type = VAL_INT;
+                    if(a.int_value == b.int_value){
                         clock_t t2 = clock();
                         // alu_time += (t2 - t1);
                         valObj.int_value = 1;
@@ -761,11 +885,12 @@ void vm_run(vm *vm, int debug, int benchmark) {
                 break;
             }
 
-            case GC:
-                    gc(vm);
-                    vm->pc += 1;
-                    break;
-
+            case GC: {
+                gc(vm);
+                vm->pc += 1;
+                break;
+            }
+        
             case HALT:{
                 vm->running = 0;
                 break;
@@ -781,4 +906,3 @@ void vm_run(vm *vm, int debug, int benchmark) {
     print_vm_state(vm, 0xFF);
     // heap_print(heap_head);
 }
-

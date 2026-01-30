@@ -1,0 +1,3 @@
+var x = 192;
+var y = 118;
+var z = x + y;

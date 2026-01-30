@@ -11,7 +11,7 @@ int compile(struct process *proc){
         return 0;
     }
     proc->ast= ast_root;
-    // ast_print(proc->ast, 0);
+    ast_print(proc->ast, 0);
     // printf("2\n");
     if(generate_ir(proc->ast) != 0){
         return 0;

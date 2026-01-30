@@ -22,5 +22,6 @@ extern clock_t stack_time;
 extern clock_t memory_time;
 void vm_init(vm *vm, unsigned char *code, int code_size);
 void vm_run(vm *vm, int debug, int benchmark);
+void vm_free(vm *vm);
 
 #endif

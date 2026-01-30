@@ -132,11 +132,11 @@ static void gen(ast_node *node)
                 case '*': emit("MUL\n"); break;
                 case '/': emit("DIV\n"); break;
             
-                case '<': emit("CMP 0\n"); break;
-                case '>': emit("CMP 1\n"); break;
+                case '<': emit("LT\n"); break;
+                case '>': emit("GT\n"); break;
                 case 'L': emit("CMP 2\n"); break;
                 case 'G': emit("CMP 3\n"); break;
-                case 'E': emit("CMP 4\n"); break;
+                case 'E': emit("EQ\n"); break;
                 case 'N': emit("CMP 5\n"); break;
             }
             break;

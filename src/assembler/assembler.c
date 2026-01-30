@@ -168,7 +168,7 @@ int assemble(const char *src, unsigned char **out_code) {
                     return -1;
                 }
             }
-            
+            // printf("%s \n", instr);
             if (!strcmp(instr, "PUSH")) {
                 emit_u8(&code, &size, &capacity, PUSH);
                 emit_i32(&code, &size, &capacity, value);
@@ -186,9 +186,6 @@ int assemble(const char *src, unsigned char **out_code) {
                 emit_i32(&code, &size, &capacity, value);
             } else if (!strcmp(instr, "JNZ")) {
                 emit_u8(&code, &size, &capacity, JNZ);
-                emit_i32(&code, &size, &capacity, value);
-            } else if (!strcmp(instr, "CMP")) {
-                emit_u8(&code, &size, &capacity, CMP);
                 emit_i32(&code, &size, &capacity, value);
             } else if (!strcmp(instr, "CALL")) {
                 emit_u8(&code, &size, &capacity, CALL);
@@ -213,6 +210,18 @@ int assemble(const char *src, unsigned char **out_code) {
                 emit_u8(&code, &size, &capacity, MUL);
             } else if (!strcmp(instr, "DIV")) {
                 emit_u8(&code, &size, &capacity, DIV);
+            } else if (!strcmp(instr, "MUL")) {
+                emit_u8(&code, &size, &capacity, MUL);
+            } else if (!strcmp(instr, "LT")) {
+                emit_u8(&code, &size, &capacity, LT);
+            } else if (!strcmp(instr, "GT")) {
+                emit_u8(&code, &size, &capacity, GT);
+            } else if (!strcmp(instr, "LTE")) {
+                emit_u8(&code, &size, &capacity, LTE);
+            } else if (!strcmp(instr, "GTE")) {
+                emit_u8(&code, &size, &capacity, GTE);
+            } else if (!strcmp(instr, "EQ")) {
+                emit_u8(&code, &size, &capacity, EQ);
             } else if (!strcmp(instr, "RET")) {
                 emit_u8(&code, &size, &capacity, RET);
             } else if (!strcmp(instr, "HALT")) {

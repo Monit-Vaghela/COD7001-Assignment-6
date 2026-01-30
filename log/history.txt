@@ -132,3 +132,49 @@ run 1
 submit tests/test2.am
 run 2
 exit
+submit tests/test1.am
+run 1
+git add .
+git commit -m "Pipelined VM"
+git push origin main
+[A
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test.am
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+submit tests/test3.am
+proc_info
+run 2
+exit
+submit tests/test4.am
+submit tests/test4.am
+run 1
+exit
+submit tests/test2.am
+run 1
+proc_info
+kill 1
+proc_info
+submit tests/test2.am
+proc_info
+run 2
+kill 2
+exit

@@ -12,7 +12,11 @@ typedef enum {
     SUB   = 0x11,
     MUL   = 0x12,
     DIV   = 0x13,
-    CMP   = 0x14,
+    LT    = 0x14,
+    LTE   = 0x15,
+    GT    = 0x16,
+    GTE   = 0x17,
+    EQ    = 0x18,
 
     JMP   = 0x20,
     JZ    = 0x21,
