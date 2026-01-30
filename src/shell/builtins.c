@@ -2,6 +2,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdbool.h>
+
 #include "shell/builtins.h"
 #include "shell/tokenizer.h"
 #include "shell/compiler.h"
@@ -18,7 +20,7 @@ void pwd() {
 }
 
 // Only for this function return for wrong is -1
-static int check_pid(const char* pid){
+static int check_pid(const char* pid, const char* command_name){
     char *endptr;
     errno = 0;
 
@@ -31,7 +33,7 @@ static int check_pid(const char* pid){
     }
 
     if (id == 0){
-        printf("Access Denied: user cannot run shell\n");
+        printf("Access Denied: user cannot %d shell\n", command_name);
         return -1;
     }
     if(id < 0){
@@ -41,28 +43,104 @@ static int check_pid(const char* pid){
     return id;
 }
 
-static int execute_process(struct base_command *cmd){
+static int execute_process(struct base_command *cmd, bool debug){
     if(cmd->argc > 2) {
-            printf("Usage: %s <id>\n", cmd->argv[0]);
-            return 1;
-        }
+        printf("Usage: %s <id>\n", cmd->argv[0]);
+        return 0;
+    }
 
-        int id = check_pid(cmd->argv[1]);
-        if(id == -1) return 0;
+    int id = check_pid(cmd->argv[1], "run");
+    if(id == -1) return 0;
 
-        //first we find the PID
-        struct process *proc = proc_list_find(id);
-        if(proc == NULL){
-            printf("No Process with pid %d\n", id);
-            return 0;
-        }
-        //change the state to running
-        proc->state = PROC_RUNNING;
-        //Then we first compile the process
-        int Compiled = compile(proc->program_path);
-        return Compiled;
+    //first we find the PID
+    struct process *proc = proc_list_find(id);
+    if(proc == NULL){
+        printf("No Process with pid %d\n", id);
+        return 0;
+    }
+    //change the state to running
+    proc->state = PROC_RUNNING;
+    //Then we first compile the process
+    int Compiled = compile(proc->program_path);
+    return Compiled;
 }
 
+static int kill_process(struct base_command *cmd){
+    if(cmd->argc > 2) {
+        printf("Usage: %s <id>\n", cmd->argv[0]);
+        return 0;
+    }
+
+    int id = check_pid(cmd->argv[1], "kill");
+    if(id == -1) return 0;
+
+    //1) find the process
+    struct process *proc = proc_list_find(id);
+    if(proc == NULL){
+        printf("No Process with pid %d\n", id);
+        return 0;
+    }
+
+    //2) Whatever its state may be, clear all the resources allocated
+    // and the remove from the linked list.
+    return 0;
+}
+
+static int debug_memstat(struct base_command *cmd){
+    if(cmd->argc > 2) {
+        printf("Usage: %s <id>\n", cmd->argv[0]);
+        return 0;
+    }
+    int id = check_pid(cmd->argv[1], "kill");
+    if(id == -1) return 0;
+
+    //1) find the pid
+    struct process *proc = proc_list_find(id);
+    if(proc == NULL){
+        printf("No Process with pid %d\n", id);
+        return 0;
+    }
+
+    //2) check its state, if submitted then cant perform memstate
+    if(proc->state == PROC_SUBMITTED){
+        printf("process %d is yet to be runned, can't perform memstat\n", proc->pid);
+        return 0;
+    }
+
+    //3) now we check if the vm heap head is not null and then print 
+    return 0;
+}
+
+static int garbage_collection(struct base_command *cmd){
+    if(cmd->argc > 2) {
+        printf("Usage: %s <id>\n", cmd->argv[0]);
+        return 0;
+    }
+    int id = check_pid(cmd->argv[1], "gc");
+    if(id == -1) return 0;
+
+    //1) find the pid
+    struct process *proc = proc_list_find(id);
+    if(proc == NULL){
+        printf("No Process with pid %d\n", id);
+        return 0;
+    }
+
+    // check the state, if submitted cant perform gc
+    if(proc->state == PROC_SUBMITTED){
+        printf("process %d is yet to be runned, can't perform gc\n", proc->pid);
+        return 0;
+    }
+
+    // perform garbage collection
+    return 0;
+}
+
+static int leaks_check(struct base_command *cmd){
+    // to perform leak check, perform mark algo only, and
+    // print out the unreachable objects
+    return 0;
+}
 
 // This function handles only 3 shell commands
 // 1) exit -> exit from the shell
@@ -100,12 +178,34 @@ int handle_builtin(struct base_command *cmd) {
         }
         return 0;
     }
+
     if (strcmp(cmd->argv[0], "proc_info") == 0) {
         print_proc_list();
         return 0;
     }
+
     if (strcmp(cmd->argv[0], "run") == 0) {
-        return execute_process(cmd);
+        return execute_process(cmd, false);
+    }
+
+    if(strcmp(cmd->argv[0], "debug") == 0) {
+        return execute_process(cmd, true);
+    }
+
+    if(strcmp(cmd->argv[0], "kill") == 0){
+        return kill_process(cmd);
+    }
+
+    if(strcmp(cmd->argv[0], "memstat") == 0){
+         return debug_memstat(cmd);
+    }
+
+    if(strcmp(cmd->argv[0], "gc") == 0){
+        return garbage_collection(cmd);
+    }
+
+    if(strcmp(cmd->argv[0], "leaks") == 0){
+        return leaks_check(cmd);
     }
 
     if (strcmp(cmd->argv[0], "exit") == 0) {
@@ -116,6 +216,7 @@ int handle_builtin(struct base_command *cmd) {
         save_history(history, history_head, history_count);
         _exit(0);
     }
+
     if (strcmp(cmd->argv[0], "cd") == 0) {
         char *t_dir;
         // If cd is alone than we need to go to home
@@ -129,17 +230,21 @@ int handle_builtin(struct base_command *cmd) {
         if (chdir(t_dir) == -1) perror("cd");
         return 0;
     }
+
     if (strcmp(cmd->argv[0], "pwd") == 0) {
         pwd();
         return 0;
     }
+
     if (strcmp(cmd->argv[0], "history") == 0) {
         print_history(history, history_head, history_count);
         return 0;
     }
+
     if (strcmp(cmd->argv[0], "bg") == 0) {
         print_bg_processes();
         return 0;
     }
+
     return 1;
 }
