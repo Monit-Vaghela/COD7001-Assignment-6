@@ -1,0 +1,106 @@
+#include <gc/heap.h>
+#include <gc/object.h>
+#include <stdlib.h>
+
+HeapLinkList *heap_head = NULL;
+
+Value value_int(int x) {
+    Value v;
+    v.type = VAL_INT;
+    v.int_value = x;
+    return v;
+}
+
+Value value_obj(HeapObj *o) {
+    Value v;
+    v.type = VAL_OBJ;
+    v.obj = o;
+    return v;
+}
+
+Value value_null(void) {
+    Value v;
+    v.type = VAL_NULL;
+    return v;
+}
+
+HeapObj *heap_alloc() {
+    HeapObj *obj = malloc(sizeof(HeapObj));
+
+    if (!obj) return NULL;
+    
+
+    obj->marked = 0;
+    return obj;
+}
+ 
+void print_Value(Value v) {
+    if (v.type == VAL_INT)
+        printf("VAL_INT(%d)", v.int_value);
+    else if (v.type == VAL_OBJ)
+        printf("VAL_OBJ(%s)", v.obj->Objname);
+    else
+        printf("NULL");
+}
+
+int heap_add(HeapObj *obj) {
+    HeapLinkList *node = malloc(sizeof(HeapLinkList));
+    if (!node) return 1;
+
+    node->node = obj;
+    node->next = heap_head;
+    heap_head = node;
+    return 0;
+}
+
+int heap_count(void) {
+    int count = 0;
+    HeapLinkList *curr = heap_head;
+    while (curr) {
+        count++;
+        curr = curr->next;
+    }
+    return count;
+}
+
+void heap_print(HeapLinkList *head) {
+    printf("\n---------------------- HEAP ----------------------\n");
+
+    if (!head) {
+        printf("Heap is empty\n");
+        return;
+    }
+
+    int index = 0;
+    while (head) {
+        HeapObj *obj = head->node;
+
+        printf("[%d] HeapObj @ %p | Object Name=%s | type=", index, (void *)obj, obj->Objname);
+
+        if (obj->type == OBJ_PAIR) {
+            printf("PAIR | marked=%d\n", obj->marked);
+            printf("     left  = ");
+            print_Value(obj->as.pair.left);
+            printf("\n     right = ");
+            print_Value(obj->as.pair.right);
+            printf("\n");
+        }
+        else if(obj->type == OBJ_FUNC){
+            printf("FUNC | marked=%d\n", obj->marked);
+            printf("     entry  = ");
+            print_Value(obj->as.func.entry);
+            printf("\n");
+        }
+        else if(obj->type == OBJ_CLOSURE){
+            printf("CLOSURE | marked=%d\n", obj->marked);
+            printf("     func  = ");
+            print_Value(obj->as.closure.func);
+            printf("\n     right = ");
+            print_Value(obj->as.closure.env);
+            printf("\n");
+        }
+        printf("------------------------------------------------\n");
+        head = head->next;
+        index++;
+    }
+}

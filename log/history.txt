@@ -30,3 +30,41 @@ run 1
 clear
 git status
 exit
+submit tests/test1.am
+proc_info
+run 1
+submit tests/test1.am
+run 2
+exit
+submit tests/test2.am
+run 1
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test2.am
+run 2
+run 1
+submit tests/test2.am
+run 1
+exit
+submit tests/test1.am
+run 1
+proc_info
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+submit tests/test2.am
+run 2
+exit
+submit tests/test1.am
+run 1
+proc_info
+submit tests/test2.am
+run 2
+proc_info
+exut
+exit

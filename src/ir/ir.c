@@ -247,4 +247,3 @@ char *generate_ir(ast_node *root)
     // fprintf(out, "HALT\n");
     // fclose(out);
 }
-

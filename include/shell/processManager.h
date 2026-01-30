@@ -1,6 +1,7 @@
 #ifndef PROCESSMANAGER_H
 #define PROCESSMANAGER_H
-
+#include "parser/ast.h"
+#include "ir/ir.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -19,8 +20,8 @@ struct process {
 
     char program_path[256];
 
-    void *ast;
-    void *ir;
+    struct ast_node *ast;
+    char *ir;
 
     void *vm_ctx;
     void *mem_ctx;

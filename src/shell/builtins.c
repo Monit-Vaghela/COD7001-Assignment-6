@@ -33,7 +33,7 @@ static int check_pid(const char* pid, const char* command_name){
     }
 
     if (id == 0){
-        printf("Access Denied: user cannot %d shell\n", command_name);
+        printf("Access Denied: user cannot %s shell\n", command_name);
         return -1;
     }
     if(id < 0){
@@ -61,7 +61,8 @@ static int execute_process(struct base_command *cmd, bool debug){
     //change the state to running
     proc->state = PROC_RUNNING;
     //Then we first compile the process
-    int Compiled = compile(proc->program_path);
+    int Compiled = compile(proc);
+    proc->state = PROC_TERMINATED;
     return Compiled;
 }
 

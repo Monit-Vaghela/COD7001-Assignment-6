@@ -1,0 +1,45 @@
+#ifndef OBJECT_H
+#define OBJECT_H
+
+#include <gc/value.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+typedef enum {
+    OBJ_PAIR,
+    OBJ_FUNC,
+    OBJ_CLOSURE
+} HeapObjType;
+
+typedef struct HeapObj {
+    HeapObjType type;
+    char Objname[16];
+    int marked;
+
+    union {
+        struct {
+            Value left;
+            Value right;
+        } pair;
+
+        struct {
+            Value entry;
+        } func;
+
+        struct {
+            Value func;
+            Value env;
+        } closure;
+    } as;
+} HeapObj;
+
+typedef struct HeapLinkList {
+    HeapObj *node;
+    struct HeapLinkList *next;
+} HeapLinkList;
+
+/* MUST take Value, not HeapObj* */
+HeapObj *new_pair(Value left, Value right);
+HeapObj *new_function(int entry);
+HeapObj *new_closure(Value func, Value env);
+#endif

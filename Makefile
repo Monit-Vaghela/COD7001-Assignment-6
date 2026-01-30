@@ -17,7 +17,8 @@ SRC := \
 	src/shell/shell.c \
 	src/shell/tokenizer.c \
 	src/shell/utils.c \
-	src/VM/intial.c \
+	src/VM/* \
+	src/gc/* \
 	src/main.c
 
 # Generated files
