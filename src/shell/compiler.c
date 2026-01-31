@@ -5,6 +5,24 @@
 #include "assembler/assembler.h"
 #include <stdbool.h>
 #include <debugger/entry.h>
+#include "VM/instruction.h"
+
+static int get_bytes(unsigned char opcode) {
+    switch (opcode) {
+        case PUSH:
+        case STORE:
+        case LOAD:
+        case JMP:
+        case JZ:
+        case JNZ:
+        case CALL:
+            return 5;
+
+        default:
+            return 1;
+    }
+}
+
 
 int compile(struct process *proc, bool dg){
     if(proc->state != PROC_TERMINATED){
@@ -17,11 +35,16 @@ int compile(struct process *proc, bool dg){
         proc->ast= ast_root;
         // ast_print(proc->ast, 0);
         // printf("2\n");
-        if(generate_ir(proc->ast) != 0){
-            return 0;
-        }
-        proc->ir = get_ir_buf();
-        // printf("This is done\n");
+        proc->ir = generate_ir(ast_root);
+        // printf("2\n");
+        int *line_numbers = get_line_numbers();
+        // printf("2\n");
+        int instruction_count = get_instruction_count();
+        // printf("2\n");
+        // for(int i = 0; i < proc->dbg_info->instruction_count; i++){
+        //     printf("%d -> %d\n", i, proc->dbg_info->line_numbers[i]);
+        // }
+        printf("This is done\n");
         FILE *out = fopen("log/output.asm", "w");
         if (out) {
             fprintf(out, "%s", proc->ir);
@@ -49,8 +72,20 @@ int compile(struct process *proc, bool dg){
         //     printf("%d -> %d\n", i, debug_info[i]);
         // }
         // allocate memory for VM
+        proc->map = malloc(sizeof(source_mapping) * instruction_count);
+        proc->map_count = instruction_count;
+        int pc = 0;
+        for(int i = 0; i < instruction_count; i++){
+            int bytes = get_bytes(code[pc]);
+            proc->map[i].instruction = opcode_to_string(code[pc]);
+            proc->map[i].instruction_start = pc;
+            proc->map[i].lineno = line_numbers[i];
+            pc+=bytes;
+            
+        }
+        proc->max_pc = pc - 1;
+        // print_source_mappings(proc);
         proc->vm = malloc(sizeof(vm));
-
         // initialize the vm
         vm_init(proc->vm, code, res);
     }
@@ -61,7 +96,7 @@ int compile(struct process *proc, bool dg){
         return 0;
     }
     // run vm
-    vm_run(proc->vm, 0, 0, -1);
+    vm_run(proc->vm, 0, 0, 1);
     proc->state = PROC_TERMINATED;
 
     return 0;

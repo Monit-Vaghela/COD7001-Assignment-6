@@ -121,7 +121,32 @@ struct process *process_create(const char *program_path) {
     p->ir = NULL;
     p->vm = NULL;
     p->mem_ctx = NULL;
+    p->map = NULL;
+    p->map_count = 0;
+    p->max_pc = 0;
     p->exit_code = 0;
-
     return p;
+}
+
+void print_source_mappings(struct process *proc) {
+    if (!proc || !proc->map || proc->map_count == 0) {
+        printf("No source mappings available.\n");
+        return;
+    }
+
+    printf("==== Source Mappings ====\n");
+    printf("%-6s %-10s %-6s\n", "Index", "PC", "Line");
+    printf("-------------------------\n");
+
+    for (int i = 0; i < proc->map_count; i++) {
+        source_mapping *m = &proc->map[i];
+
+        printf("%-6d %-10d %-6d %s\n",
+               i,
+               m->instruction_start,
+               m->lineno,
+               m->instruction ? m->instruction : "(null)");
+    }
+
+    printf("=========================\n");
 }

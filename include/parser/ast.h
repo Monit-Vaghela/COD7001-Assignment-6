@@ -1,6 +1,14 @@
 #ifndef AST_H
 #define AST_H
 
+typedef struct debug_info {
+    int line;
+    int var_id;
+    int scope_id;
+    int control_id;
+    int alloc_site_id;
+} debug_info;
+
 typedef enum {
     AST_PROGRAM,
     AST_BLOCK,
@@ -33,7 +41,8 @@ typedef struct ast_node {
     int lineno;       
     char *name;          
     char op;            
-
+    debug_info dbg;
+    
 } ast_node;
 
 

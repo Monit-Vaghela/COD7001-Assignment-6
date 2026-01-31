@@ -47,5 +47,5 @@ typedef enum {
     HALT  = 0xFF
 } opcode;
 
-
+char *opcode_to_string(unsigned char op);
 #endif

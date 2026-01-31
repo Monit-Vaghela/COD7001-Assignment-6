@@ -7,6 +7,7 @@
 #include <time.h>
 #include <gc/value.h>
 
+
 typedef struct vm {
     unsigned char *code;
     int code_size;

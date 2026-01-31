@@ -8,7 +8,7 @@ int debug(struct process *proc) {
     char cmd[256];
 
     // firstly lets create debug info
-    struct debug_info info;
+    struct debug_frame info;
     info.state = LOADED;
     info.breakpoint_count = 0;
 
@@ -67,6 +67,7 @@ int debug(struct process *proc) {
         {
             int res = debugger_step(proc, &info);
             if(res == 100) {
+                print_info("Code execution complete");
                 info.state = EXITED;
             }
             if(res == 101){
@@ -197,6 +198,10 @@ int debug(struct process *proc) {
         else if(strncmp(cmd, "break ", 6) == 0)
         {
             int lineno = (int)strtoul(cmd + 6, NULL, 0);
+            if(lineno > proc->max_pc){
+                print_error("Address our of bounds");
+                continue;
+            }
             int res = set_breakpoint(&info, lineno, proc->vm->code, 0);
             if (res == 0) {
                 printf(COLOR_ORANGE
@@ -263,7 +268,7 @@ int debug(struct process *proc) {
 
         //     debugger_memory_inspection(addr, child_pid, count, state);
         // }
-        else if(strcmp(cmd, "debug_info") == 0) {
+        else if(strcmp(cmd, "debug_frame") == 0) {
             print_bytecode(proc->vm->code, 57);
         }
         else if(strcmp(cmd, "regs") == 0){
@@ -275,6 +280,9 @@ int debug(struct process *proc) {
         }
         else if(strcmp(cmd, "stack") == 0){
             stack_print(&(proc->vm->stack));
+        }
+        else if(strcmp(cmd, "break_code") == 0){
+            print_source_mappings(proc);
         }
         // else if (strcmp(cmd, "help") == 0) {
         //     print_info("Available debugger commands:");

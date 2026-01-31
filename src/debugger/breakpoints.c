@@ -12,9 +12,9 @@
 #include <errno.h>
 #include "debugger/utils.h"
 
-static int add_breakpoint(struct debug_info *dbg_info, int lineno, unsigned char orig_word);
+static int add_breakpoint(struct debug_frame *dbg_info, int lineno, unsigned char orig_word);
 static int add_interrupt(int lineno, unsigned char *bytecode);
-static int reinsert_breakpoint(struct debug_info *dbg_info, int lineno, unsigned char *bytecode);
+static int reinsert_breakpoint(struct debug_frame *dbg_info, int lineno, unsigned char *bytecode);
 
 void print_bytecode(const unsigned char *bytecode, size_t size) {
     if (!bytecode) {
@@ -29,7 +29,7 @@ void print_bytecode(const unsigned char *bytecode, size_t size) {
 
 // This fucntion initializes all the set breakpoint
 // Can be used if the user wishes to rerun the program.
-void init_breakpoints(struct debug_info *dbg_info, unsigned char *bytecode) {
+void init_breakpoints(struct debug_frame *dbg_info, unsigned char *bytecode) {
     for (int i = 0; i < dbg_info->breakpoint_count; i++){
         dbg_info->breakpoints[i].enabled = 1;
         set_breakpoint(dbg_info, dbg_info->breakpoints[i].lineno, bytecode, 1);
@@ -37,7 +37,7 @@ void init_breakpoints(struct debug_info *dbg_info, unsigned char *bytecode) {
 }
 
 // Used to list all the breakpoints
-void breakpoint_info(struct debug_info *dbg_info) {
+void breakpoint_info(struct debug_frame *dbg_info) {
     if (dbg_info->breakpoint_count == 0){
         print_info("No breakpoints set\n");
         return;
@@ -53,7 +53,7 @@ void breakpoint_info(struct debug_info *dbg_info) {
 }
 
 //  Used to find the breakpoint's index
-int find_breakpoint(struct debug_info *dbg_info, int lineno) {
+int find_breakpoint(struct debug_frame *dbg_info, int lineno) {
     /*
     Input : address to search in breakpoint
     Output:
@@ -68,7 +68,7 @@ int find_breakpoint(struct debug_info *dbg_info, int lineno) {
 
 // Add breakpoints to the list of breakpoits
 // Internal Function
-static int add_breakpoint(struct debug_info *dbg_info, int lineno, unsigned char orig_word){
+static int add_breakpoint(struct debug_frame *dbg_info, int lineno, unsigned char orig_word){
     if (dbg_info->breakpoint_count >= MAX_BREAKPOINTS) {
         print_info("Max Breakpoints Reached\n");
         return -1;
@@ -93,7 +93,7 @@ static int add_breakpoint(struct debug_info *dbg_info, int lineno, unsigned char
 
 // Used to disable the breakpoint
 // Does not remove the breakpoint from the breakpoint list
-int disable_breakpoints(struct debug_info *dbg_info, int lineno, unsigned char *bytecode) {
+int disable_breakpoints(struct debug_frame *dbg_info, int lineno, unsigned char *bytecode) {
     /*
     Inputs : 
     addr -> breakpoint address
@@ -127,7 +127,7 @@ int disable_breakpoints(struct debug_info *dbg_info, int lineno, unsigned char *
 }
 
 // Used to enable the breakpoints
-int enable_breakpoints(struct debug_info *dbg_info, int lineno, unsigned char *bytecode){
+int enable_breakpoints(struct debug_frame *dbg_info, int lineno, unsigned char *bytecode){
     int breakpoint_index = find_breakpoint(dbg_info, lineno);
     if(breakpoint_index == -1){
         printf(COLOR_ORANGE
@@ -164,7 +164,7 @@ static int add_interrupt(int lineno, unsigned char *bytecode){
 }
 
 // Used to set a new breakpoint
-int set_breakpoint(struct debug_info *dbg_info, int lineno, unsigned char *bytecode, int reset) {
+int set_breakpoint(struct debug_frame *dbg_info, int lineno, unsigned char *bytecode, int reset) {
     /*
     Inputs :
     addr -> the location where breakpoint is to be set
@@ -181,6 +181,7 @@ int set_breakpoint(struct debug_info *dbg_info, int lineno, unsigned char *bytec
         return 1;
     }
 
+    // check if the lineno is out of index or not.
     // Not other way around 
     // Need to get the original word in order to enter it into the 
     // database
@@ -204,7 +205,7 @@ int set_breakpoint(struct debug_info *dbg_info, int lineno, unsigned char *bytec
 }
 
 // Used after hitting the breakpoint
-static int reinsert_breakpoint(struct debug_info *dbg_info, int lineno, unsigned char *bytecode) {
+static int reinsert_breakpoint(struct debug_frame *dbg_info, int lineno, unsigned char *bytecode) {
     /*
     Inputs : 
     addr -> where the breakpoint is supposed to be reinserted
@@ -229,7 +230,7 @@ static int reinsert_breakpoint(struct debug_info *dbg_info, int lineno, unsigned
     return add_interrupt(lineno, bytecode);
 }
 
-int remove_breakpoint(struct debug_info *dbg_info, int lineno, unsigned char *bytecode) {
+int remove_breakpoint(struct debug_frame *dbg_info, int lineno, unsigned char *bytecode) {
     /*
     Inputs : 
     addr -> where the breakpoint is supposed to be removed from
@@ -270,7 +271,7 @@ int remove_breakpoint(struct debug_info *dbg_info, int lineno, unsigned char *by
 }
 // Used for handling the breakpoints
 // When they are hit.
-int handle_breakpoint(struct process *proc, struct debug_info *dbg_info){
+int handle_breakpoint(struct process *proc, struct debug_frame *dbg_info){
 
     int breakpoint_addr = proc->vm->pc;
     int breakpoint_index = find_breakpoint(dbg_info, breakpoint_addr);

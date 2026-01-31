@@ -94,6 +94,7 @@ void print_vm_state(vm *vm, unsigned char opcode){
     printf("====================================================\n");
 }
 
+
 void vm_init(vm *vm, unsigned char *code, int code_size){
     // printf("Initializing virtual machine\n");
     vm->code = code;

@@ -24,17 +24,17 @@ WHITESPACE [ \t\r\n]+
 
 %%
 
-"var" { return VAR; }
-"if" { return IF; }
-"else" { return ELSE; }
-"while" { return WHILE; }
+"var" { yylval.lineno = yylineno; return VAR; }
+"if" { yylval.lineno = yylineno; return IF; }
+"else" { yylval.lineno = yylineno; return ELSE; }
+"while" { yylval.lineno = yylineno; return WHILE; }
 
 "==" { return EQ; }
 "!=" { return NE; }
 "<=" { return LE; }
 ">=" { return GE; }
 
-"=" { return ASSIGN; }
+"=" { yylval.lineno = yylineno; return ASSIGN; }
 "<" { return LT; }
 ">" { return GT; }
 "+" { return PLUS; }
@@ -45,8 +45,8 @@ WHITESPACE [ \t\r\n]+
 ";" { return SEMI; }
 "(" { return LPAREN; }
 ")" { return RPAREN; }
-"{" { return LBRACE; }
-"}" { return RBRACE; }
+"{" { yylval.lineno = yylineno; return LBRACE; }
+"}" { yylval.lineno = yylineno; return RBRACE; }
 
 {INTEGER} {
     yylval.ival = atoi(yytext);

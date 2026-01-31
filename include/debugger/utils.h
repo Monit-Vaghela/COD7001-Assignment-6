@@ -15,7 +15,7 @@ typedef struct {
     int enabled;
 } breakpoint_t;
 
-struct debug_info{
+struct debug_frame{
     dbg_state state; // Initital State
     breakpoint_t breakpoints[MAX_BREAKPOINTS];
     int breakpoint_count;

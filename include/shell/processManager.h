@@ -14,6 +14,11 @@ enum proc_state {
     PROC_DEBUG,
     PROC_TERMINATED
 };
+typedef struct source_mapping {
+    char *instruction;
+    int lineno;
+    int instruction_start;
+}source_mapping;
 
 struct process {
     int pid;
@@ -22,6 +27,9 @@ struct process {
     char program_path[256];
 
     struct ast_node *ast;
+    source_mapping *map;
+    int map_count;
+    int max_pc;
     char *ir;
 
     vm *vm;
@@ -41,5 +49,5 @@ int proc_list_remove(int pid);
 void proc_list_free();
 struct process *process_create(const char *program_path);
 void print_proc_list();
-
+void print_source_mappings(struct process *proc);
 #endif
