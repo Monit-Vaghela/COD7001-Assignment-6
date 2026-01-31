@@ -26,7 +26,7 @@ static ast_node *ast_create_empty_node(ast_node_type type, int line) {
     node->right = NULL;
     node->extra = NULL;
     node->int_value = 0;
-    node->lineno = line;
+    node->dbg.line = line;
     node->name = NULL;
     node->op = 0;
 
@@ -168,61 +168,89 @@ ast_node *ast_append_statement(ast_node *list, ast_node *stmt)
     return list;
 }
 
+static void print_dbg(ast_node *node)
+{
+    printf(" [line=%d scope=%d var=%d ctrl=%d]",
+           node->dbg.line,
+           node->dbg.scope_id,
+           node->dbg.var_id,
+           node->dbg.control_id);
+}
+
 void ast_print(ast_node *node, int indent)
 {
     if (!node)
         return;
-    
-    for (int i = 0; i < indent; i++) printf("  ");
+
+    for (int i = 0; i < indent; i++)
+        printf("  ");
 
     switch (node->type)
     {
         case AST_INT:
-            printf("INT(%d)\n", node->int_value);
+            printf("INT(%d)", node->int_value);
+            print_dbg(node);
+            printf("\n");
             break;
 
         case AST_IDENT:
-            printf("IDENT(%s)\n", node->name);
+            printf("IDENT(%s)", node->name);
+            print_dbg(node);
+            printf("\n");
             break;
 
         case AST_BINOP:
-            printf("BINOP(%c)\n", node->op);
+            printf("BINOP(%c)", node->op);
+            print_dbg(node);
+            printf("\n");
             ast_print(node->left, indent + 1);
             ast_print(node->right, indent + 1);
             break;
 
         case AST_ASSIGN:
-            printf("ASSIGN(%s)\n", node->name);
+            printf("ASSIGN(%s)", node->name);
+            print_dbg(node);
+            printf("\n");
             ast_print(node->left, indent + 1);
             break;
 
         case AST_VAR_DECL:
-            printf("VAR_DECL(%s)\n", node->name);
+            printf("VAR_DECL(%s)", node->name);
+            print_dbg(node);
+            printf("\n");
             if (node->left)
                 ast_print(node->left, indent + 1);
             break;
 
         case AST_IF:
-            printf("IF\n");
+            printf("IF");
+            print_dbg(node);
+            printf("\n");
             ast_print(node->left, indent + 1);
             ast_print(node->right, indent + 1);
             break;
 
         case AST_IF_ELSE:
-            printf("IF_ELSE\n");
+            printf("IF_ELSE");
+            print_dbg(node);
+            printf("\n");
             ast_print(node->left, indent + 1);
             ast_print(node->right, indent + 1);
             ast_print(node->extra, indent + 1);
             break;
 
         case AST_WHILE:
-            printf("WHILE\n");
+            printf("WHILE");
+            print_dbg(node);
+            printf("\n");
             ast_print(node->left, indent + 1);
             ast_print(node->right, indent + 1);
             break;
 
         case AST_BLOCK:
-            printf("BLOCK\n");
+            printf("BLOCK");
+            print_dbg(node);
+            printf("\n");
             ast_print(node->left, indent + 1);
             break;
 
@@ -230,17 +258,14 @@ void ast_print(ast_node *node, int indent)
             printf("UNKNOWN NODE\n");
     }
 
-/* Traverse statement list ONLY for simple statements */
-if ((node->type == AST_VAR_DECL ||
-     node->type == AST_ASSIGN || 
-    node->type == AST_BLOCK) &&
-    node->right)
-{
-    ast_print(node->right, indent);
-}
-
-
-
+    /* Traverse statement list */
+    if ((node->type == AST_VAR_DECL ||
+         node->type == AST_ASSIGN ||
+         node->type == AST_BLOCK) &&
+        node->right)
+    {
+        ast_print(node->right, indent);
+    }
 }
 
 void ast_free(ast_node *node)

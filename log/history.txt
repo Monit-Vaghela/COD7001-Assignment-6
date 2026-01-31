@@ -186,3 +186,69 @@ run 1
 submit tests/test2.am
 run 2
 exit
+submit tests/test5.am
+proc_info
+run 1
+make clean
+clear
+make
+make clean
+make
+clear
+make
+make clean
+clear
+make
+./myShell
+clear
+make clean
+make
+./myShell
+exit
+submit tests/test5.am
+run 1
+exi
+exit
+submit tests/test5.am
+run 1
+clear
+make 
+clear
+make clean
+make
+./myShell
+exit
+submit tests/test6.am
+submit tests/test6.am
+proc_info
+run 1
+make clean
+make
+clea
+clear
+make clean
+make
+./myShell
+exit
+submit tests/test6.am
+tun 1
+run 1
+submit tests/test5.am
+proc_info
+run 2
+run 2
+run 2
+run 2
+exit 
+submit tests/test5.am
+proc_info
+run 1
+run 1
+run 1
+run 1
+exit
+submit tests/test5.am
+run 1
+run 1
+run 1
+exit
