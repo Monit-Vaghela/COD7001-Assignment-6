@@ -58,10 +58,8 @@ static int execute_process(struct base_command *cmd, bool debug){
         printf("No Process with pid %d\n", id);
         return 0;
     }
-    //change the state to running
-    proc->state = PROC_RUNNING;
     //Then we first compile the process
-    int Compiled = compile(proc);
+    int Compiled = compile(proc, debug);
     proc->state = PROC_TERMINATED;
     return Compiled;
 }

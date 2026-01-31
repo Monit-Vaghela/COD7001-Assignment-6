@@ -4,7 +4,6 @@ CFLAGS += -Wno-unused-function
 
 # Source files
 SRC := \
-	src/debugger/intial.c \
 	src/ir/ir.c \
 	src/parser/ast.c \
 	src/parser/parser_driver.c \
@@ -20,6 +19,7 @@ SRC := \
 	src/assembler/assembler.c \
 	src/VM/* \
 	src/gc/* \
+	src/debugger/* \
 	src/main.c
 
 # Generated files

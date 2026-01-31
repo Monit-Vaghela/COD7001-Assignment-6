@@ -44,3 +44,9 @@ HeapObj *new_closure(Value func, Value env){
     heap_add(obj);
     return obj;
 }
+
+void object_reset_counters(void) {
+    pair_counter = 1;
+    function_counter = 1;
+    closure_counter = 1;
+}

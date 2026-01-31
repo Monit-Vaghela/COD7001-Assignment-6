@@ -18,12 +18,12 @@ static const char *proc_state_to_string(enum proc_state state) {
     }
 }
 
-static void free_process_resources(struct process *proc){
-    if(proc->ast != NULL){
-        ast_free(proc->ast);
+static void free_process_resources(struct process proc){
+    if(proc.ast != NULL){
+        ast_free(proc.ast);
     }
-    if(proc->vm != NULL){
-        free(proc->vm);
+    if(proc.vm != NULL){
+        free(proc.vm);
     }
     // right now we are just clearing vm but
     // we need to check the heap objects in vm
@@ -80,7 +80,7 @@ int proc_list_remove(int pid) {
                 prev->next = curr->next;
             else
                 *head = curr->next;
-            free_process_resources(curr);
+            free_process_resources(curr->proc);
             free(curr);
             return 0;
         }

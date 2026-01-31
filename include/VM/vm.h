@@ -15,13 +15,15 @@ typedef struct vm {
 
     stack stack;
     stack call_stack;
-    Value memory[MEM_SIZE];
+    Value memory[1024];
 } vm;
 
 extern clock_t stack_time;
 extern clock_t memory_time;
 void vm_init(vm *vm, unsigned char *code, int code_size);
-void vm_run(vm *vm, int debug, int benchmark);
+int vm_run(vm *vm, int debug, int benchmark, int stepSize);
 void vm_free(vm *vm);
-
+void vm_reset(vm *vm);
+void print_mem(vm *vm);
+void print_vm_state(vm *vm, unsigned char opcode);
 #endif

@@ -104,3 +104,16 @@ void heap_print(HeapLinkList *head) {
         index++;
     }
 }
+
+void heap_destroy(void) {
+    HeapLinkList *curr = heap_head;
+
+    while (curr) {
+        HeapLinkList *next = curr->next;
+        free(curr->node);   // HeapObj
+        free(curr);         // HeapLinkList
+        curr = next;
+    }
+
+    heap_head = NULL;
+}

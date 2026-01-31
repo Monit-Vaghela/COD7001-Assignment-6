@@ -186,3 +186,221 @@ run 1
 submit tests/test2.am
 run 2
 exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+run 1
+exit
+submit tests/test1.am
+run 1
+run 1
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+make
+make clean
+make
+,./my	
+.Shell
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+make clean
+make
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.an
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+debug 1
+proc_info
+exit
+submit tests/test1.am
+run 1
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+make clean
+exit
+submit tests/test1.am
+run 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+make clean
+make
+quit
+exit
+submit tests/test1.an
+submit tests/test1.am
+debug 1
+run 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests.test1.an
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+quir
+clear
+quit
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+quit
+nak====make clean
+quit
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+make clean
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+make clean
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+ssubmit tests/test1.am
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+clear
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+exit
+submit tests/test1.am
+debug 1
+debug 1
+exit
+clear
+submit tests/test1.am
+debug 1
+debug 1
+clear
+submit tests/test1.am
+debug 1
+debug 1
+exit
+clear
+submit tests/test1.am
+debug 1
+debug 1
+exit
+clear
+submit tests/test1.am
+debug 1
+debug 1
+proc_info
+exit

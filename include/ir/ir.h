@@ -5,5 +5,7 @@
 
 int generate_ir(ast_node *root);
 char *get_ir_buf();
+int *get_debug_info();
+int get_debug_size();
 
 #endif

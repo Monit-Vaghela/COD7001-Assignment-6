@@ -11,6 +11,8 @@ static char *ir_buf;
 static int ir_size;
 static int ir_cap;
 
+static int debug_info[10000];
+static int debug_info_pointer = 0;
 static int label_id = 0;
 
 static int new_label() {
@@ -19,6 +21,12 @@ static int new_label() {
 
 char *get_ir_buf(){
     return ir_buf;
+}
+int *get_debug_info(){
+    return debug_info;
+}
+int get_debug_size(){
+    return debug_info_pointer;
 }
 
 static void ir_init(void)
@@ -235,6 +243,7 @@ static void gen(ast_node *node)
             // ignore for now
             break;
     }
+    debug_info[debug_info_pointer++] = node->lineno;
 }
 
 

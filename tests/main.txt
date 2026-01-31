@@ -1,0 +1,278 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ptrace.h>
+#include <sys/wait.h>
+#include <sys/user.h>
+#include <unistd.h>
+#include <string.h>
+#include "debugger.h"
+#include "breakpoints.h"
+#include "watchpoints.h"
+#include "utils.h"
+#include <signal.h>
+
+dbg_state state = NOT_STARTED; // Initital State
+pid_t child_pid = -1;          // No child initially
+
+int main(int argc, char *argv[]) {
+    if(argc <2)
+    {
+        print_info("[DEBUGGER / INFO] : Less number of arguments");
+        return 1;
+    }
+    // printf("Ready to debug program: %s \n", argv[1]);
+
+    char cmd[256];
+
+    signal(SIGINT, SIG_IGN);
+
+    while(1)
+    {
+        printf(COLOR_GREEN "dbg> " COLOR_RESET);
+
+        if (!fgets(cmd,sizeof(cmd),stdin)){ // For EOF and input failure handling
+            printf("\n");
+            break;
+        }
+
+        cmd[strcspn(cmd, "\n")] = 0;   // Handling newline character
+        
+        if(strcmp(cmd, "quit") == 0 || strcmp(cmd, "q") == 0)
+        {
+            int exit = debugger_quit(&child_pid, &state);
+            if(exit)
+            {
+                break;
+            }
+            continue;
+        }
+        else if(strcmp(cmd, "run") == 0 || strcmp(cmd, "r") == 0)
+        {
+            debugger_run(argv, &state, &child_pid);
+        }
+        else if(strcmp(cmd, "step") == 0 || strcmp(cmd, "s") == 0)
+        {
+            debugger_step(&state, &child_pid);
+        }
+        else if(strcmp(cmd, "continue") == 0 || strcmp(cmd, "c") == 0)
+        {
+            debugger_continue(&state, &child_pid);
+        }
+        else if(strcmp(cmd, "regs") == 0 || strcmp(cmd, "rg") == 0)
+        {
+            debugger_regs(child_pid, state, 0);
+        }
+        else if(strcmp(cmd, "regs -e") == 0 || strcmp(cmd, "rg -e") == 0)
+        {
+            debugger_regs(child_pid, state, 1);
+        }
+        else if(strcmp(cmd, "bpinfo") == 0)
+        {
+            breakpoint_info();
+        }
+        else if (strncmp(cmd, "disablewp ", 10) == 0)
+        {
+            if (child_pid <= 0) {
+                print_error("No child process exists");
+                continue;
+            }
+
+            if (state != STOPPED) {
+                print_error("Program must be stopped to disable watchpoint");
+                continue;
+            }
+
+            unsigned long addr = strtoul(cmd + 10, NULL, 0);
+            int res = disable_watchpoints(addr);
+
+            if (res == 0) {
+                print_info("Watchpoint disabled");
+            }
+        }
+        else if (strncmp(cmd, "enablewp ", 9) == 0)
+        {
+            if (child_pid <= 0) {
+                print_error("No child process exists");
+                continue;
+            }
+
+            if (state != STOPPED) {
+                print_error("Program must be stopped to enable watchpoint");
+                continue;
+            }
+
+            unsigned long addr = strtoul(cmd + 9, NULL, 0);
+            int res = enable_watchpoints(addr);
+
+            if (res == 0) {
+                print_info("Watchpoint enabled");
+            }
+        }
+        else if (strcmp(cmd, "wpinfo") == 0) {
+            watchpoint_info();
+        }
+        else if (strncmp(cmd, "watch ", 6) == 0)
+        {
+            unsigned long addr = strtoul(cmd + 6, NULL, 16);
+            debugger_watchpoints(addr, child_pid, state);
+        }
+        else if(strncmp(cmd, "disablebp ", 10) == 0)
+        {
+            if(child_pid<=0)
+            {
+                print_error("No child process exists");
+                continue;
+            }
+            if (state != STOPPED) { // Breakpoint can be disabled only when program is STOPPED and not in RUNNING or any other state.
+                print_error("Program must be stopped to disable breakpoint\n");
+                continue;
+            }
+            unsigned long addr = strtoul(cmd + 10, NULL, 0);
+            int res = disable_breakpoints(addr, child_pid);
+            if (res == 0) {
+                printf(COLOR_ORANGE
+                "[DEBUGGER / Info] : Breakpoint disabled at "
+                VAL_BLUE("0x%lx")
+                COLOR_RESET "\n",
+                addr);
+            }
+        }
+        else if(strncmp(cmd, "enablebp ", 9) == 0)
+        {
+            if(child_pid<=0)
+            {
+                print_error("No child process exists");
+                continue;
+            }
+            if (state != STOPPED) { // Breakpoint can be enabled only when program is STOPPED and not in RUNNING or any other state.
+                print_error("Program must be stopped to enable breakpoint\n");
+                continue;
+            }
+            unsigned long addr = strtoul(cmd + 9, NULL, 0);
+            int res = enable_breakpoints(addr, child_pid);
+            if (res == 0) {
+                printf(COLOR_ORANGE
+                "[DEBUGGER / Info] : Breakpoint enabled at "
+                VAL_BLUE("0x%lx")
+                COLOR_RESET "\n",
+                addr);
+            }
+        }
+        else if(strcmp(cmd, "state") == 0)
+        {
+            printf(COLOR_ORANGE
+                "[DEBUGGER / Info] : Current state of debugger is "
+                VAL_BLUE("%s")
+                COLOR_RESET "\n",
+                debugger_state_to_string(state));
+        }
+        else if(strncmp(cmd, "break ", 6) == 0)
+        {
+            if(child_pid<=0)
+            {
+                print_error("No child process exists");
+                continue;
+            }
+            if (state != STOPPED) { // Breakpoint set when program is STOPPED and not in RUNNING state
+                print_error("Program must be stopped to set breakpoint\n");
+                continue;
+            }
+            unsigned long addr = strtoul(cmd + 6, NULL, 0);
+            int res = set_breakpoint(addr, child_pid, 0);
+            if (res == 0) {
+                printf(COLOR_ORANGE
+                "[DEBUGGER / Info] : Breakpoint set at "
+                VAL_BLUE("0x%lx")
+                COLOR_RESET "\n",
+                addr);
+            }
+        }
+        else if (strncmp(cmd, "mem ", 4) == 0) {
+            char *p = cmd + 4;
+            char *end;
+            unsigned long addr;
+            int count;
+
+            // these will be registers
+            if (*p == '$') {
+                struct user_regs_struct regs;
+
+                if (ptrace(PTRACE_GETREGS, child_pid, NULL, &regs) == -1) {
+                    perror("PTRACE_GETREGS");
+                    continue;
+                }
+
+                if (strncmp(p, "$rsp", 4) == 0) {
+                    addr = regs.rsp;
+                    p += 4;
+                } else if (strncmp(p, "$rbp", 4) == 0) {
+                    addr = regs.rbp;
+                    p += 4;
+                } else if (strncmp(p, "$rip", 4) == 0) {
+                    addr = regs.rip;
+                    p += 4;
+                } else {
+                    print_error("Unknown register\n");
+                    continue;
+                }
+            }
+            
+            else {
+                addr = strtoul(p, &end, 0);
+                if (end == p) {
+                    print_error("Invalid address\n");
+                    continue;
+                }
+                p = end;
+            }
+
+            /* skip whitespace */
+            while (*p == ' ' || *p == '\t')
+                p++;
+
+            /* parse count */
+            count = (int)strtol(p, &end, 10);
+            if (end == p || count <= 0) {
+                print_error("Invalid count\n");
+                continue;
+            }
+
+            debugger_memory_inspection(addr, child_pid, count, state);
+        }
+
+        else if (strcmp(cmd, "help") == 0) {
+            print_info("Available debugger commands:");
+
+            print_info("run | r                  : Start the program");
+            print_info("continue | c             : Continue execution");
+            print_info("step | s                 : Execute one instruction");
+            print_info("quit | q                 : Quit the debugger");
+
+            print_info("state                    : Show current debugger state");
+
+            print_info("regs | rg                : Show general purpose registers");
+            print_info("regs -e | rg -e          : Show extended registers");
+
+            print_info("break <addr>             : Set breakpoint at address");
+            print_info("disablebp <addr>         : Disable breakpoint");
+            print_info("enablebp <addr>          : Enable breakpoint");
+            print_info("bpinfo                   : List all breakpoints");
+
+            print_info("watch <addr>             : Set watchpoint at address");
+            print_info("disablewp <addr>         : Disable watchpoint");
+            print_info("enablewp <addr>          : Enable watchpoint");
+            print_info("wpinfo                   : List all watchpoints");
+
+            print_info("mem <addr> <count>       : Inspect memory from address");
+            print_info("mem $rsp <count>         : Inspect memory from RSP");
+            print_info("mem $rbp <count>         : Inspect memory from RBP");
+            print_info("mem $rip <count>         : Inspect memory from RIP");
+
+            print_info("help                     : Show this help message");
+        }
+        else {
+            print_info("Command does not exist. Type 'help' to see all available commands");
+        }
+    }
+    return 0;
+}

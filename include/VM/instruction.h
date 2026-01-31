@@ -42,6 +42,8 @@ typedef enum {
 
     GC = 0x70,
 
+    BREAK = 0xCC,
+    
     HALT  = 0xFF
 } opcode;
 

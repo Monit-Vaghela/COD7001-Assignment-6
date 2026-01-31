@@ -17,4 +17,6 @@ Value value_null(void);
 
 void print_Value(Value v);
 void heap_print(HeapLinkList *head);
+void heap_destroy(void);
+
 #endif

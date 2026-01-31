@@ -42,4 +42,6 @@ typedef struct HeapLinkList {
 HeapObj *new_pair(Value left, Value right);
 HeapObj *new_function(int entry);
 HeapObj *new_closure(Value func, Value env);
+void object_reset_counters(void);
+
 #endif
