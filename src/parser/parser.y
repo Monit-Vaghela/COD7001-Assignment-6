@@ -19,7 +19,6 @@ extern int yylineno;
 
 void yyerror(const char *s);
 
-/* ---------- DEBUG METADATA INIT ---------- */
 #define INIT_DBG(node)                             \
     do {                                           \
         (node)->dbg.line = yylineno;               \
@@ -40,29 +39,24 @@ void yyerror(const char *s);
     int lineno;
 }
 
-/* Keywords - track their line numbers */
-%token <lineno> VAR IF ELSE WHILE
-
-/* Identifiers */
+%token <lineno> VAR IF ELSE WHILE OBJ NEW
 %token <sval> IDENTIFIER
-
-/* Literals */
 %token <ival> INTEGER
 
-/* Operators */
 %token PLUS MINUS MUL DIV
 %token <lineno> ASSIGN
 %token EQ NE LT GT LE GE
 
-/* Syntax */
 %token LPAREN RPAREN
 %token <lineno> LBRACE RBRACE
-%token SEMI
+%token SEMI DOT
 
-/* Non terminals */
+%token SET_LEFT SET_RIGHT GET_LEFT GET_RIGHT REMOVE_LEFT REMOVE_RIGHT
+
 %type <node> program
 %type <node> stmt stmt_list block
-%type <node> variable_decl assignment
+%type <node> variable_decl obj_decl assignment
+%type <node> obj_operation
 %type <node> if_stmt while_stmt
 %type <node> expression equality comparison term factor unary primary
 
@@ -83,7 +77,6 @@ program:
     ;
 
 stmt_list:
-    /* empty */
     {
         $$ = NULL;
     }
@@ -95,7 +88,9 @@ stmt_list:
 
 stmt:
     variable_decl { $$ = $1; }
+    | obj_decl { $$ = $1; }
     | assignment  { $$ = $1; }
+    | obj_operation { $$ = $1; }
     | if_stmt     { $$ = $1; }
     | while_stmt  { $$ = $1; }
     | block       { $$ = $1; }
@@ -111,7 +106,7 @@ block:
     RBRACE
     {
         exit_scope();
-        $$ = ast_make_block($3, $1);  /* Use LBRACE line number */
+        $$ = ast_make_block($3, $1);
         $$->dbg.line = $1;
         $$->dbg.scope_id = get_current_scope();
         $$->dbg.var_id = -1;
@@ -119,8 +114,6 @@ block:
         $$->dbg.alloc_site_id = -1;
     }
     ;
-
-/* ---------------- VARIABLE DECL ---------------- */
 
 variable_decl:
     VAR IDENTIFIER SEMI
@@ -136,7 +129,7 @@ variable_decl:
             var_id = ++var_counter;
         }
 
-        $$ = ast_make_var_decl($2, NULL, $1);  /* Use VAR token line */
+        $$ = ast_make_var_decl($2, NULL, $1);
         $$->dbg.line = $1;
         $$->dbg.scope_id = get_current_scope();
         $$->dbg.var_id = var_id;
@@ -157,7 +150,7 @@ variable_decl:
             var_id = ++var_counter;
         }
 
-        $$ = ast_make_var_decl($2, $4, $1);  /* Use VAR token line */
+        $$ = ast_make_var_decl($2, $4, $1);
         $$->dbg.line = $1;
         $$->dbg.scope_id = get_current_scope();
         $$->dbg.var_id = var_id;
@@ -166,7 +159,35 @@ variable_decl:
     }
     ;
 
-/* ---------------- ASSIGNMENT ---------------- */
+obj_decl:
+    OBJ IDENTIFIER ASSIGN NEW SEMI
+    {
+        int alloc_id = -1;
+        
+        if (symtab_insert_obj($2) != 0) {
+            fprintf(stderr,
+                    "Error at line %d: redeclaration of object '%s'\n",
+                    $1, $2);
+            semantic_error = 1;
+        } else {
+            alloc_id = ++alloc_counter;
+        }
+
+        ast_node *new_node = ast_make_new($4);
+        new_node->dbg.line = $4;
+        new_node->dbg.scope_id = get_current_scope();
+        new_node->dbg.var_id = -1;
+        new_node->dbg.control_id = -1;
+        new_node->dbg.alloc_site_id = alloc_id;
+
+        $$ = ast_make_obj_decl($2, new_node, $1);
+        $$->dbg.line = $1;
+        $$->dbg.scope_id = get_current_scope();
+        $$->dbg.var_id = -1;
+        $$->dbg.control_id = -1;
+        $$->dbg.alloc_site_id = alloc_id;
+    }
+    ;
 
 assignment:
     IDENTIFIER ASSIGN expression SEMI
@@ -178,7 +199,7 @@ assignment:
             semantic_error = 1;
         }
 
-        $$ = ast_make_assign($1, $3, $2);  /* Use ASSIGN token line */
+        $$ = ast_make_assign($1, $3, $2);
         $$->dbg.line = $2;
         $$->dbg.scope_id = get_current_scope();
         $$->dbg.var_id = -1;
@@ -187,12 +208,69 @@ assignment:
     }
     ;
 
-/* ---------------- IF / WHILE ---------------- */
+obj_operation:
+    IDENTIFIER DOT SET_LEFT ASSIGN expression SEMI
+    {
+        symbol_t *sym = lookup_symbol($1);
+        if (!sym) {
+            fprintf(stderr, "Error at line %d: object '%s' not declared\n", yylineno, $1);
+            semantic_error = 1;
+        } else if (sym->type != SYM_OBJ) {
+            fprintf(stderr, "Error at line %d: '%s' is not an object\n", yylineno, $1);
+            semantic_error = 1;
+        }
+
+        $$ = ast_make_obj_set_left($1, $5, yylineno);
+        INIT_DBG($$);
+    }
+    | IDENTIFIER DOT SET_RIGHT ASSIGN expression SEMI
+    {
+        symbol_t *sym = lookup_symbol($1);
+        if (!sym) {
+            fprintf(stderr, "Error at line %d: object '%s' not declared\n", yylineno, $1);
+            semantic_error = 1;
+        } else if (sym->type != SYM_OBJ) {
+            fprintf(stderr, "Error at line %d: '%s' is not an object\n", yylineno, $1);
+            semantic_error = 1;
+        }
+
+        $$ = ast_make_obj_set_right($1, $5, yylineno);
+        INIT_DBG($$);
+    }
+    | IDENTIFIER DOT REMOVE_LEFT SEMI
+    {
+        symbol_t *sym = lookup_symbol($1);
+        if (!sym) {
+            fprintf(stderr, "Error at line %d: object '%s' not declared\n", yylineno, $1);
+            semantic_error = 1;
+        } else if (sym->type != SYM_OBJ) {
+            fprintf(stderr, "Error at line %d: '%s' is not an object\n", yylineno, $1);
+            semantic_error = 1;
+        }
+
+        $$ = ast_make_obj_remove_left($1, yylineno);
+        INIT_DBG($$);
+    }
+    | IDENTIFIER DOT REMOVE_RIGHT SEMI
+    {
+        symbol_t *sym = lookup_symbol($1);
+        if (!sym) {
+            fprintf(stderr, "Error at line %d: object '%s' not declared\n", yylineno, $1);
+            semantic_error = 1;
+        } else if (sym->type != SYM_OBJ) {
+            fprintf(stderr, "Error at line %d: '%s' is not an object\n", yylineno, $1);
+            semantic_error = 1;
+        }
+
+        $$ = ast_make_obj_remove_right($1, yylineno);
+        INIT_DBG($$);
+    }
+    ;
 
 if_stmt:
     IF LPAREN expression RPAREN stmt
     {
-        $$ = ast_make_if($3, $5, $1);  /* Use IF token line */
+        $$ = ast_make_if($3, $5, $1);
         $$->dbg.line = $1;
         $$->dbg.scope_id = get_current_scope();
         $$->dbg.var_id = -1;
@@ -202,7 +280,7 @@ if_stmt:
 
     | IF LPAREN expression RPAREN stmt ELSE stmt
     {
-        $$ = ast_make_if_else($3, $5, $7, $1);  /* Use IF token line */
+        $$ = ast_make_if_else($3, $5, $7, $1);
         $$->dbg.line = $1;
         $$->dbg.scope_id = get_current_scope();
         $$->dbg.var_id = -1;
@@ -214,7 +292,7 @@ if_stmt:
 while_stmt:
     WHILE LPAREN expression RPAREN stmt
     {
-        $$ = ast_make_while($3, $5, $1);  /* Use WHILE token line */
+        $$ = ast_make_while($3, $5, $1);
         $$->dbg.line = $1;
         $$->dbg.scope_id = get_current_scope();
         $$->dbg.var_id = -1;
@@ -222,8 +300,6 @@ while_stmt:
         $$->dbg.alloc_site_id = -1;
     }
     ;
-
-/* ---------------- EXPRESSIONS ---------------- */
 
 expression:
     equality { $$ = $1; }
@@ -322,6 +398,36 @@ primary:
         }
 
         $$ = ast_make_ident($1, yylineno);
+        INIT_DBG($$);
+    }
+
+    | IDENTIFIER DOT GET_LEFT
+    {
+        symbol_t *sym = lookup_symbol($1);
+        if (!sym) {
+            fprintf(stderr, "Error at line %d: object '%s' not declared\n", yylineno, $1);
+            semantic_error = 1;
+        } else if (sym->type != SYM_OBJ) {
+            fprintf(stderr, "Error at line %d: '%s' is not an object\n", yylineno, $1);
+            semantic_error = 1;
+        }
+
+        $$ = ast_make_obj_get_left($1, yylineno);
+        INIT_DBG($$);
+    }
+
+    | IDENTIFIER DOT GET_RIGHT
+    {
+        symbol_t *sym = lookup_symbol($1);
+        if (!sym) {
+            fprintf(stderr, "Error at line %d: object '%s' not declared\n", yylineno, $1);
+            semantic_error = 1;
+        } else if (sym->type != SYM_OBJ) {
+            fprintf(stderr, "Error at line %d: '%s' is not an object\n", yylineno, $1);
+            semantic_error = 1;
+        }
+
+        $$ = ast_make_obj_get_right($1, yylineno);
         INIT_DBG($$);
     }
 

@@ -1,0 +1,4 @@
+obj a = new;
+var x = 5;
+a.set_left = x;
+a.remove_left;

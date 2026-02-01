@@ -24,11 +24,11 @@ void symtab_cleanup()
     curr_scope = 0;
 }
 
-
 void enter_scope()
 {
     curr_scope = curr_scope + 1;
 }
+
 void exit_scope()
 {
     while(symtab_head!=NULL && symtab_head->scope == curr_scope)
@@ -44,7 +44,6 @@ void exit_scope()
     }
 }
 
-
 int symtab_insert(const char *name, int value)
 {
     symbol_t *symbol = lookup_symbol(name);
@@ -55,7 +54,7 @@ int symtab_insert(const char *name, int value)
     }
     symbol_t *new_symbol = malloc(sizeof(symbol_t));
     
-    if (!new_symbol)   // if malloc return NULL
+    if (!new_symbol)
     {
         perror("malloc");
         return -1;
@@ -65,6 +64,7 @@ int symtab_insert(const char *name, int value)
     new_symbol->name = strdup(name);
     new_symbol->value = value;
     new_symbol->scope = curr_scope;
+    new_symbol->type = SYM_VAR;
 
     new_symbol->next = symtab_head;
     symtab_head = new_symbol;
@@ -72,6 +72,33 @@ int symtab_insert(const char *name, int value)
     return 0;
 }
 
+int symtab_insert_obj(const char *name)
+{
+    symbol_t *symbol = lookup_symbol(name);
+    if(symbol && symbol->scope == curr_scope)
+    {
+        printf("Object already exists\n");
+        return -1;
+    }
+    symbol_t *new_symbol = malloc(sizeof(symbol_t));
+    
+    if (!new_symbol)
+    {
+        perror("malloc");
+        return -1;
+    }
+    new_symbol->next = NULL;
+    
+    new_symbol->name = strdup(name);
+    new_symbol->value = 0;
+    new_symbol->scope = curr_scope;
+    new_symbol->type = SYM_OBJ;
+
+    new_symbol->next = symtab_head;
+    symtab_head = new_symbol;
+    
+    return 0;
+}
 
 int symtab_update(const char *name, int value)
 {
@@ -85,7 +112,6 @@ int symtab_update(const char *name, int value)
     return 0;
 }
 
-
 void symtab_print()
 {
     printf("SYMBOL TABLE\n");
@@ -95,10 +121,10 @@ void symtab_print()
         printf("Symbol name = %s\n", temp->name);
         printf("Symbol value = %d\n", temp->value);
         printf("Symbol scope = %d\n", temp->scope);
+        printf("Symbol type = %s\n", temp->type == SYM_VAR ? "VAR" : "OBJ");
         temp = temp->next;
     }
 }
-
 
 symbol_t *lookup_symbol(const char *name)
 {
@@ -107,11 +133,11 @@ symbol_t *lookup_symbol(const char *name)
     {
         if (strcmp(temp->name, name) == 0)
         {
-            return temp;   // nearest scope matches
+            return temp;
         }
         temp = temp->next;
     }
-    return NULL;  // Symbol not found
+    return NULL;
 }
 
 symbol_t *get_symbol_table(void)

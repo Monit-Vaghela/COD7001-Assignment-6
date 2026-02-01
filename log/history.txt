@@ -524,3 +524,29 @@ submit tests/test1.am
 run 2
 git add .
 exit
+submit tests/test5.am
+proc_info
+run 1
+submit tests/test6.am
+run 2
+submit tests/test7.am
+proc_info
+run 3
+submit tests/test8.am
+proc_info
+run 4
+submit tests/test7.am
+proc_info
+run 5
+exit
+submit tests/test5.am
+rum test 5
+run 1
+git add .
+make clean
+make
+gexit
+exit
+submit tests/test5.am
+run 1
+exit

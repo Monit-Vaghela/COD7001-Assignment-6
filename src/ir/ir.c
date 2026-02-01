@@ -219,6 +219,77 @@ static void gen(ast_node *node)
             break;
         }
 
+        case AST_OBJ_DECL: {
+            int slot = create_slot(node->name);
+            if (node->left) {
+                gen(node->left);
+                if (ir_error) return;
+                emit_tracked(line, "STORE %d\n", slot);
+            }
+            break;
+        }
+
+        case AST_NEW: {
+            emit_tracked(line, "NEW_PAIR\n");
+            break;
+        }
+
+        case AST_OBJ_SET_LEFT: {
+            int slot = lookup_slot(node->name);
+            if (ir_error) return;
+            emit_tracked(line, "LOAD %d\n", slot);
+            gen(node->left);
+            if (ir_error) return;
+            emit_tracked(line, "SET_LEFT\n");
+            emit_tracked(line, "STORE %d\n", slot);
+            break;
+        }
+
+        case AST_OBJ_SET_RIGHT: {
+            int slot = lookup_slot(node->name);
+            if (ir_error) return;
+            emit_tracked(line, "LOAD %d\n", slot);
+            gen(node->left);
+            if (ir_error) return;
+            emit_tracked(line, "SET_RIGHT\n");
+            emit_tracked(line, "STORE %d\n", slot);
+            break;
+        }
+
+        case AST_OBJ_GET_LEFT: {
+            int slot = lookup_slot(node->name);
+            if (ir_error) return;
+            emit_tracked(line, "LOAD %d\n", slot);
+            emit_tracked(line, "GET_LEFT\n");
+            break;
+        }
+
+        case AST_OBJ_GET_RIGHT: {
+            int slot = lookup_slot(node->name);
+            if (ir_error) return;
+            emit_tracked(line, "LOAD %d\n", slot);
+            emit_tracked(line, "GET_RIGHT\n");
+            break;
+        }
+
+        case AST_OBJ_REMOVE_LEFT: {
+            int slot = lookup_slot(node->name);
+            if (ir_error) return;
+            emit_tracked(line, "LOAD %d\n", slot);
+            emit_tracked(line, "REMOVE_LEFT\n");
+            emit_tracked(line, "STORE %d\n", slot);
+            break;
+        }
+
+        case AST_OBJ_REMOVE_RIGHT: {
+            int slot = lookup_slot(node->name);
+            if (ir_error) return;
+            emit_tracked(line, "LOAD %d\n", slot);
+            emit_tracked(line, "REMOVE_RIGHT\n");
+            emit_tracked(line, "STORE %d\n", slot);
+            break;
+        }
+
         case AST_ASSIGN: {
             int slot = lookup_slot(node->name);
             if (ir_error) return;  

@@ -25,9 +25,18 @@ WHITESPACE [ \t\r\n]+
 %%
 
 "var" { yylval.lineno = yylineno; return VAR; }
+"obj" { yylval.lineno = yylineno; return OBJ; }
+"new" { yylval.lineno = yylineno; return NEW; }
 "if" { yylval.lineno = yylineno; return IF; }
 "else" { yylval.lineno = yylineno; return ELSE; }
 "while" { yylval.lineno = yylineno; return WHILE; }
+
+"set_left" { return SET_LEFT; }
+"set_right" { return SET_RIGHT; }
+"get_left" { return GET_LEFT; }
+"get_right" { return GET_RIGHT; }
+"remove_left" { return REMOVE_LEFT; }
+"remove_right" { return REMOVE_RIGHT; }
 
 "==" { return EQ; }
 "!=" { return NE; }
@@ -47,6 +56,7 @@ WHITESPACE [ \t\r\n]+
 ")" { return RPAREN; }
 "{" { yylval.lineno = yylineno; return LBRACE; }
 "}" { yylval.lineno = yylineno; return RBRACE; }
+"." { return DOT; }
 
 {INTEGER} {
     yylval.ival = atoi(yytext);
@@ -65,8 +75,7 @@ WHITESPACE [ \t\r\n]+
 "/*"([^*]|(\*+[^*/]))*\*+"/" { /* ignore multi-line comments */ }
 
 . {
-    printf("Lexical error at line %d: unknown character '%s'\n", yylineno, yytext);
-    exit(1);
+    fprintf(stderr, "Lexical error at line %d: unknown character '%s'\n", yylineno, yytext);
 }
 
 %%

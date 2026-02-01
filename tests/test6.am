@@ -1,0 +1,5 @@
+var x = 10;
+var y = 20;
+obj a = new;
+a.set_left = x;
+a.set_right = y;
