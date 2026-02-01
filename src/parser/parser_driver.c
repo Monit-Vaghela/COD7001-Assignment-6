@@ -53,6 +53,7 @@ int parse_file(const char *filename)
     
     // Get line numbers
     int *lines = get_line_numbers();
+    ast_node **roots = get_ast_roots();
     int count = get_instruction_count();
     
     // printf("\nLine Number Mapping:\n");

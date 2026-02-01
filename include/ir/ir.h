@@ -6,9 +6,10 @@
 char *generate_ir(ast_node *root);
 char *get_ir_buf(void);
 
-/* Get array of line numbers for each instruction */
 int *get_line_numbers(void);
 int get_instruction_count(void);
+
+ast_node **get_ast_roots(void);
 
 void reset_ir_state(void);
 

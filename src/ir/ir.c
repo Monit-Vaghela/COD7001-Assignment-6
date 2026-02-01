@@ -13,10 +13,12 @@ static int ir_cap;
 static int label_id = 0;
 static int ir_error = 0;  
 
-/* Line number tracking */
 static int *line_numbers = NULL;
 static int line_count = 0;
 static int line_cap = 0;
+
+static ast_node **ast_roots = NULL;
+static ast_node *current_ast_root = NULL;
 
 static int new_label() {
     return label_id++;
@@ -34,6 +36,10 @@ int get_instruction_count() {
     return line_count;
 }
 
+ast_node **get_ast_roots() {
+    return ast_roots;
+}
+
 static void ir_init(void)
 {
     ir_cap = 4096;
@@ -41,13 +47,12 @@ static void ir_init(void)
     ir_buf = malloc(ir_cap);
     ir_buf[0] = '\0';
     
-    /* Initialize line number array */
     line_cap = 256;
     line_count = 0;
     line_numbers = malloc(line_cap * sizeof(int));
+    ast_roots = malloc(line_cap * sizeof(ast_node *));
 }
 
-// variable → slot mapping 
 typedef struct {
     char *name;
     int slot;
@@ -105,17 +110,18 @@ static void emit(const char *fmt, ...)
     ir_buf[ir_size] = '\0';
 }
 
-/* Add line number to array */
 static void add_line(int line)
 {
     if (line_count >= line_cap) {
         line_cap *= 2;
         line_numbers = realloc(line_numbers, line_cap * sizeof(int));
+        ast_roots = realloc(ast_roots, line_cap * sizeof(ast_node *));
     }
-    line_numbers[line_count++] = line;
+    line_numbers[line_count] = line;
+    ast_roots[line_count] = current_ast_root;
+    line_count++;
 }
 
-/* Emit instruction and track line number */
 static void emit_tracked(int line, const char *fmt, ...)
 {
     char temp[256];
@@ -136,7 +142,6 @@ static void emit_tracked(int line, const char *fmt, ...)
     ir_size += len;
     ir_buf[ir_size] = '\0';
     
-    /* Add line number to array */
     add_line(line);
 }
 
@@ -298,6 +303,7 @@ char *generate_ir(ast_node *root)
     
     ir_init();
     ir_error = 0;
+    current_ast_root = root;
     gen(root);
     
     if (ir_error) { 
@@ -315,9 +321,9 @@ void reset_ir_state(void)
     next_slot = 0;
     var_count = 0;
     current_scope = 0;
-    ir_error = 0; 
+    ir_error = 0;
+    current_ast_root = NULL;
     
-    // Free and reset buffers
     if (ir_buf) {
         free(ir_buf);
         ir_buf = NULL;
@@ -326,13 +332,16 @@ void reset_ir_state(void)
         free(line_numbers);
         line_numbers = NULL;
     }
+    if (ast_roots) {
+        free(ast_roots);
+        ast_roots = NULL;
+    }
     
     ir_size = 0;
     ir_cap = 0;
     line_count = 0;
     line_cap = 0;
     
-    // Free variable names
     for (int i = 0; i < var_count; i++) {
         if (vars[i].name) {
             free(vars[i].name);
