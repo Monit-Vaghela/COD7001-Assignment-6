@@ -90,7 +90,7 @@ void print_vm_state(vm *vm, unsigned char opcode){
     printf("\n---------------------- MEMORY -----------------------\n");
     print_mem(vm);
 
-    heap_print(heap_head);
+    heap_print(vm->heap_head);
     printf("====================================================\n");
 }
 
@@ -111,6 +111,8 @@ void vm_init(vm *vm, unsigned char *code, int code_size){
     
     for(int i = 0; i < MEM_SIZE; i++)
         mem_initialized[i] = 0;
+
+    vm->heap_head = NULL;
 }
 
 void vm_reset(vm *vm) {
@@ -134,13 +136,16 @@ void vm_reset(vm *vm) {
     }
 
     /* Heap */
-    heap_destroy();
+    heap_destroy(vm->heap_head);
 
     /* Object naming reset (important for debugger determinism) */
     object_reset_counters();
 }
 
 int vm_run(vm *vm, int debug, int benchmark, int stepSize) {
+    vm_error_flag = 0;
+    mem_error_flag = 0;
+    stck_error_flag = 0;
     while(vm->running && vm->pc < vm->code_size){
         unsigned char opcode = vm->code[vm->pc];
 
@@ -636,7 +641,7 @@ int vm_run(vm *vm, int debug, int benchmark, int stepSize) {
                 Value left = value_null();
                 Value right = value_null();
 
-                HeapObj *obj = new_pair(left, right);
+                HeapObj *obj = new_pair(&(vm->heap_head), left, right);
                 Value v = value_obj(obj);
                 if(stack_push(&vm->stack, v) != 0){
                     printf("[VM Error / %d]: Stack is Full Cannot Push\n", vm->pc);
@@ -726,7 +731,9 @@ int vm_run(vm *vm, int debug, int benchmark, int stepSize) {
                     vm->running = 0;
                     break;
                 }
-
+                if(a.obj->as.pair.left.type == VAL_NULL){
+                    printf("[VM Error / %d]: Referencing Null Pointer\n", vm->pc);
+                }
                 Value left = a.obj->as.pair.left;
 
                 if(stack_push(&vm->stack, left) != 0){
@@ -753,7 +760,9 @@ int vm_run(vm *vm, int debug, int benchmark, int stepSize) {
                     vm->running = 0;
                     break;
                 }
-
+                if(a.obj->as.pair.right.type == VAL_NULL){
+                    printf("[VM Error / %d]: Referencing Null Pointer\n", vm->pc);
+                }
                 Value right = a.obj->as.pair.right;
 
                 if(stack_push(&vm->stack, right) != 0){
@@ -828,7 +837,7 @@ int vm_run(vm *vm, int debug, int benchmark, int stepSize) {
                     break;
                 }
 
-                HeapObj *function = new_function(addr);
+                HeapObj *function = new_function(&vm->heap_head, addr);
                 Value v = value_obj(function);
                 if(stack_push(&vm->stack, v) != 0){
                     printf("[VM Error / %d]: Stack is Full Cannot Push\n", vm->pc);
@@ -867,7 +876,7 @@ int vm_run(vm *vm, int debug, int benchmark, int stepSize) {
                 }
 
                 // Create a new HeapObj of type OBJ_CLOSURE
-                HeapObj *closure = new_closure(b, a);
+                HeapObj *closure = new_closure(&vm->heap_head, b, a);
                 Value v = value_obj(closure);
                 if(stack_push(&vm->stack, v) != 0){
                     printf("[VM Error / %d]: Stack is Full Cannot Push\n", vm->pc);
@@ -918,7 +927,7 @@ int vm_run(vm *vm, int debug, int benchmark, int stepSize) {
             }
 
             case GC: {
-                gc(vm);
+                gc_run(vm);
                 vm->pc += 1;
                 break;
             }
@@ -945,6 +954,7 @@ int vm_run(vm *vm, int debug, int benchmark, int stepSize) {
     }
     // printf("\n\nFINAL VM STATE\n");
     // print_vm_state(vm, 0xFF);
-    return 100;
+    if(vm_error_flag || mem_error_flag || stck_error_flag) return 8;
+    return 0;
     // heap_print(heap_head);
 }

@@ -1,0 +1,8 @@
+var x = 0;
+var y = 100;
+
+while (x < y) {
+    obj a = new;
+    x = x + 1;
+    a.set_left = x;
+}

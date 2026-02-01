@@ -275,9 +275,129 @@ void ast_print(ast_node *node, int indent)
 
     switch (node->type)
     {
-        /* all cases unchanged — only comments restored */
-        /* ... */
+        case AST_INT:
+            printf("INT(%d)", node->int_value);
+            print_dbg(node);
+            printf("\n");
+            break;
+
+        case AST_IDENT:
+            printf("IDENT(%s)", node->name);
+            print_dbg(node);
+            printf("\n");
+            break;
+
+        case AST_BINOP:
+            printf("BINOP(%c)", node->op);
+            print_dbg(node);
+            printf("\n");
+            ast_print(node->left, indent + 1);
+            ast_print(node->right, indent + 1);
+            break;
+
+        case AST_ASSIGN:
+            printf("ASSIGN(%s)", node->name);
+            print_dbg(node);
+            printf("\n");
+            ast_print(node->left, indent + 1);
+            break;
+
+        case AST_VAR_DECL:
+            printf("VAR_DECL(%s)", node->name);
+            print_dbg(node);
+            printf("\n");
+            if (node->left)
+                ast_print(node->left, indent + 1);
+            break;
+
+        case AST_OBJ_DECL:
+            printf("OBJ_DECL(%s)", node->name);
+            print_dbg(node);
+            printf("\n");
+            if (node->left)
+                ast_print(node->left, indent + 1);
+            break;
+
+        case AST_NEW:
+            printf("NEW");
+            print_dbg(node);
+            printf("\n");
+            break;
+
+        case AST_OBJ_SET_LEFT:
+            printf("OBJ_SET_LEFT(%s)", node->name);
+            print_dbg(node);
+            printf("\n");
+            ast_print(node->left, indent + 1);
+            break;
+
+        case AST_OBJ_SET_RIGHT:
+            printf("OBJ_SET_RIGHT(%s)", node->name);
+            print_dbg(node);
+            printf("\n");
+            ast_print(node->left, indent + 1);
+            break;
+
+        case AST_OBJ_GET_LEFT:
+            printf("OBJ_GET_LEFT(%s)", node->name);
+            print_dbg(node);
+            printf("\n");
+            break;
+
+        case AST_OBJ_GET_RIGHT:
+            printf("OBJ_GET_RIGHT(%s)", node->name);
+            print_dbg(node);
+            printf("\n");
+            break;
+
+        case AST_OBJ_REMOVE_LEFT:
+            printf("OBJ_REMOVE_LEFT(%s)", node->name);
+            print_dbg(node);
+            printf("\n");
+            break;
+
+        case AST_OBJ_REMOVE_RIGHT:
+            printf("OBJ_REMOVE_RIGHT(%s)", node->name);
+            print_dbg(node);
+            printf("\n");
+            break;
+
+        case AST_IF:
+            printf("IF");
+            print_dbg(node);
+            printf("\n");
+            ast_print(node->left, indent + 1);
+            ast_print(node->right, indent + 1);
+            break;
+
+        case AST_IF_ELSE:
+            printf("IF_ELSE");
+            print_dbg(node);
+            printf("\n");
+            ast_print(node->left, indent + 1);
+            ast_print(node->right, indent + 1);
+            ast_print(node->extra, indent + 1);
+            break;
+
+        case AST_WHILE:
+            printf("WHILE");
+            print_dbg(node);
+            printf("\n");
+            ast_print(node->left, indent + 1);
+            ast_print(node->right, indent + 1);
+            break;
+
+        case AST_BLOCK:
+            printf("BLOCK");
+            print_dbg(node);
+            printf("\n");
+            ast_print(node->left, indent + 1);
+            break;
+
+        default:
+            printf("UNKNOWN NODE\n");
     }
+
 
     /*
     Traverse linked statement list

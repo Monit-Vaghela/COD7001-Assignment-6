@@ -3,11 +3,8 @@
 
 #include <gc/object.h>
 
-/* Head of heap linked list */
-extern HeapLinkList *heap_head;
-
-int heap_add(HeapObj *obj);
-int heap_count(void);
+int heap_add(HeapObj *obj, HeapLinkList **heap_head);
+int heap_count(HeapLinkList *heap_head);
 
 HeapObj *heap_alloc(void);
 
@@ -17,6 +14,6 @@ Value value_null(void);
 
 void print_Value(Value v);
 void heap_print(HeapLinkList *head);
-void heap_destroy(void);
+void heap_destroy(HeapLinkList *heap_head);
 
 #endif

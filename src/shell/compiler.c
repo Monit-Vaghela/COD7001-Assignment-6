@@ -24,27 +24,36 @@ static int get_bytes(unsigned char opcode) {
 }
 
 
-int compile(struct process *proc, bool dg){
+int compile(struct process *proc){
     if(proc->state != PROC_TERMINATED){
         proc->state = PROC_RUNNING;
         // first letd parse and get the ast.
         // printf("Process State %d\n", proc->state);
         if(parse_file(proc->program_path) != 0){
+            proc->exit_code = 1;
             return 0;
         }
         proc->ast= ast_root;
         // ast_print(proc->ast, 0);
         // printf("2\n");
         proc->ir = generate_ir(ast_root);
+        if (!proc->ir) {
+            fprintf(stderr, "IR generation aborted due to errors.\n");
+            fclose(yyin);
+            proc->exit_code = 2;
+            return 0;
+        }
+
         // printf("2\n");
         int *line_numbers = get_line_numbers();
         // printf("2\n");
         int instruction_count = get_instruction_count();
+        proc->lines = get_last_line();
         // printf("2\n");
         // for(int i = 0; i < proc->dbg_info->instruction_count; i++){
         //     printf("%d -> %d\n", i, proc->dbg_info->line_numbers[i]);
         // }
-        printf("This is done\n");
+        // printf("This is done\n");
         FILE *out = fopen("log/output.asm", "w");
         if (out) {
             fprintf(out, "%s", proc->ir);
@@ -57,6 +66,7 @@ int compile(struct process *proc, bool dg){
         int res = assemble(proc->ir, &code);
         // printf("DONE ASSEMBLING, %d\n", res);
         if(res == -1){
+            proc->exit_code = 4;
             return 0;
         }
         // print the program code
@@ -89,15 +99,36 @@ int compile(struct process *proc, bool dg){
         // initialize the vm
         vm_init(proc->vm, code, res);
     }
+    proc->state = PROC_SUBMITTED;
+    proc->exit_code = 0;
+    return 0;
+}
 
+int run(struct process *proc, bool dg){
+    if(proc->exit_code != 0){
+        printf("Cannot run this program due to ");
+        if(proc->exit_code == 1){
+            printf("PARSER Error ");
+        }
+        else if(proc->exit_code == 2){
+            printf("IR Error ");
+        }
+        else if(proc->exit_code == 4){
+            printf("ASSEMBLER Error ");
+        }
+        printf("during compilation\n");
+        return 0;
+    }
     if(dg){
         debug(proc);
         proc->state = PROC_TERMINATED;
         return 0;
     }
+    vm_reset(proc->vm);
     // run vm
-    vm_run(proc->vm, 0, 0, 1);
+    int vm_res = vm_run(proc->vm, 0, 0, 1);
     proc->state = PROC_TERMINATED;
 
+    proc->exit_code = vm_res;
     return 0;
 }

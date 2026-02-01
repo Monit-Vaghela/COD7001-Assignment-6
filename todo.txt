@@ -3,11 +3,7 @@ Monit
 1) adding comparision operators
 2) removing all extern variables with static and adding get functions
 3) testing the pipeline with multiple test cases
-4) checking freeing of resources
-5) changing debugger to latch onto my processes [DONE]
-6) remember debugging in static right now
-7) rememer halt is satic rn.
-8) debugger also need max code size(actual lines)
+
 
 Anunay
 

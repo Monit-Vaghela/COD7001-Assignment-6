@@ -8,7 +8,6 @@
 #include "shell/shell.h"
 #include "shell/processManager.h"
 
-
 #define COLOR_GREEN   "\033[32m" // colour green
 #define COLOR_BLUE    "\033[34m" // colour blue
 #define COLOR_RESET   "\033[0m" // colour reset

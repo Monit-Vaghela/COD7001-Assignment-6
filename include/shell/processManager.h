@@ -30,18 +30,19 @@ struct process {
     source_mapping *map;
     int map_count;
     int max_pc;
+    int lines;
     char *ir;
 
     vm *vm;
-    void *mem_ctx;
 
     int exit_code;
 };
 
 struct proc_node {
-    struct process proc;
+    struct process *proc;
     struct proc_node *next;
 };
+
 
 int proc_list_add(const struct process *p);
 struct process *proc_list_find(int pid);

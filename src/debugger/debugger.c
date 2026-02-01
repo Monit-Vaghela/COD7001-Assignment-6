@@ -4,10 +4,7 @@
 #include <sys/wait.h>
 #include "debugger/debugger.h"
 #include "debugger/breakpoints.h"
-#include "debugger/watchpoints.h"
-#include "debugger/regs.h"
 #include "debugger/utils.h"
-#include "debugger/memory.h"
 #include <unistd.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -50,54 +47,12 @@ int debugger_continue(struct process *proc, struct debug_frame *dbg_info)
     return 1;
 }
 
-// int debugger_regs(pid_t child_pid, dbg_state state, int isExtended)
-// {
-//     if(child_pid<=0)
-//     {
-//         print_error("No child process exists");
-//         return 1;
-//     }
-//     if(state != STOPPED)
-//     {
-//         print_error("Cannot read registers as program must be stopped");
-//         return 1;
-//     }
-//     print_registers(child_pid, isExtended);
-//     return 0;
-// }
 
 int debugger_quit()
 {
     return 1;
 }
 
-// int debugger_watchpoints(unsigned long addr, pid_t pid, dbg_state state)
-// {
-//     if (pid <= 0) {
-//         print_error("No child process");
-//         return 1;
-//     }
-//     if (state != STOPPED) {
-//         print_error("Program must be stopped to set watchpoint");
-//         return 1;
-//     }
-//     add_watchpoint(addr, pid);
-//     return 0;
-// }
-
-// int debugger_memory_inspection(unsigned long addr, pid_t pid, int count, dbg_state state)
-// {
-//     if (pid <= 0) {
-//         print_error("No child process");
-//         return 1;
-//     }
-//     if (state != STOPPED) {
-//         print_error("Program must be stopped to set watchpoint");
-//         return 1;
-//     }
-//     inspect_memory(addr, pid, count);
-//     return 0;
-// }
 
 const char* debugger_state_to_string(struct debug_frame *dbg_info)
 {

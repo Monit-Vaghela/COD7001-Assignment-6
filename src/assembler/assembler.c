@@ -224,6 +224,20 @@ int assemble(const char *src, unsigned char **out_code) {
                 emit_u8(&code, &size, &capacity, EQ);
             } else if (!strcmp(instr, "RET")) {
                 emit_u8(&code, &size, &capacity, RET);
+            } else if (!strcmp(instr, "NEW_PAIR")) {
+                emit_u8(&code, &size, &capacity, NEW_PAIR);
+            } else if (!strcmp(instr, "SET_LEFT")) {
+                emit_u8(&code, &size, &capacity, SET_LEFT);
+            } else if (!strcmp(instr, "SET_RIGHT")) {
+                emit_u8(&code, &size, &capacity, SET_RIGHT);
+            } else if (!strcmp(instr, "GET_LEFT")) {
+                emit_u8(&code, &size, &capacity, GET_LEFT);
+            } else if (!strcmp(instr, "GET_RIGHT")) {
+                emit_u8(&code, &size, &capacity, GET_RIGHT);
+            } else if (!strcmp(instr, "REMOVE_LEFT")) {
+                emit_u8(&code, &size, &capacity, REMOVE_LEFT);
+            } else if (!strcmp(instr, "REMOVE_RIGHT")) {
+                emit_u8(&code, &size, &capacity, REMOVE_LEFT);
             } else if (!strcmp(instr, "HALT")) {
                 emit_u8(&code, &size, &capacity, HALT);
             } else {

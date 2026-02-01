@@ -39,9 +39,9 @@ typedef struct HeapLinkList {
 } HeapLinkList;
 
 /* MUST take Value, not HeapObj* */
-HeapObj *new_pair(Value left, Value right);
-HeapObj *new_function(int entry);
-HeapObj *new_closure(Value func, Value env);
+HeapObj *new_pair(HeapLinkList **heap_head, Value left, Value right);
+HeapObj *new_function(HeapLinkList **heap_head, int entry);
+HeapObj *new_closure(HeapLinkList **heap_head, Value func, Value env);
 void object_reset_counters(void);
 
 #endif

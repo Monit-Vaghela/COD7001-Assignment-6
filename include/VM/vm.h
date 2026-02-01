@@ -17,6 +17,8 @@ typedef struct vm {
     stack stack;
     stack call_stack;
     Value memory[1024];
+
+    HeapLinkList *heap_head;
 } vm;
 
 extern clock_t stack_time;

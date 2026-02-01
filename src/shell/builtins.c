@@ -8,6 +8,8 @@
 #include "shell/tokenizer.h"
 #include "shell/compiler.h"
 #include "errno.h"
+#include "gc/heap.h"
+#include "gc/gc.h"
 
 void pwd() {
     char *cwd = getcwd(NULL, 0);
@@ -44,7 +46,7 @@ static int check_pid(const char* pid, const char* command_name){
 }
 
 static int execute_process(struct base_command *cmd, bool debug){
-    if(cmd->argc > 2) {
+    if(cmd->argc > 2 || cmd->argc < 2) {
         printf("Usage: %s <id>\n", cmd->argv[0]);
         return 0;
     }
@@ -58,14 +60,12 @@ static int execute_process(struct base_command *cmd, bool debug){
         printf("No Process with pid %d\n", id);
         return 0;
     }
-    //Then we first compile the process
-    int Compiled = compile(proc, debug);
-    proc->state = PROC_TERMINATED;
-    return Compiled;
+    run(proc, debug);
+    return 0;
 }
 
 static int kill_process(struct base_command *cmd){
-    if(cmd->argc > 2) {
+    if(cmd->argc > 2 || cmd->argc < 2) {
         printf("Usage: %s <id>\n", cmd->argv[0]);
         return 0;
     }
@@ -79,14 +79,14 @@ static int kill_process(struct base_command *cmd){
         printf("No Process with pid %d\n", id);
         return 0;
     }
-
+    printf("killing process %d\n", id);
     //2) Whatever its state may be, clear all the resources allocated
     proc_list_remove(id);
     return 0;
 }
 
 static int debug_memstat(struct base_command *cmd){
-    if(cmd->argc > 2) {
+    if(cmd->argc > 2 || cmd->argc < 2) {
         printf("Usage: %s <id>\n", cmd->argv[0]);
         return 0;
     }
@@ -107,11 +107,17 @@ static int debug_memstat(struct base_command *cmd){
     }
 
     //3) now we check if the vm heap head is not null and then print 
+    if(proc->vm->heap_head == NULL){
+        printf("No Memory Allocated for pid %d\n", id);
+        return 0;
+    }
+
+    heap_print(proc->vm->heap_head);
     return 0;
 }
 
 static int garbage_collection(struct base_command *cmd){
-    if(cmd->argc > 2) {
+    if(cmd->argc > 2 || cmd->argc < 2) {
         printf("Usage: %s <id>\n", cmd->argv[0]);
         return 0;
     }
@@ -132,6 +138,7 @@ static int garbage_collection(struct base_command *cmd){
     }
 
     // perform garbage collection
+    gc_run(proc->vm);
     return 0;
 }
 
@@ -149,6 +156,7 @@ static int leaks_check(struct base_command *cmd){
 int handle_builtin(struct base_command *cmd) {
     // print_history(history, history_head, history_count);
     if (cmd->argc == 0) return 1;
+    
     if (strcmp(cmd->argv[0], "submit") == 0) {
         // printf("next input is : %s\n", cmd->argv[1]);
         if(cmd->argc > 2){
@@ -175,6 +183,8 @@ int handle_builtin(struct base_command *cmd) {
         if(proc_list_add(p) != 0){
             printf("Unable to create process\n");
         }
+        //Then we first compile the process
+        compile(p);
         return 0;
     }
 

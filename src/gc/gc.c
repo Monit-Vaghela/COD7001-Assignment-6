@@ -42,7 +42,6 @@ static void push_children(HeapObj *obj, HeapObj **worklist, int *top) {
     }
 }
 
-
 static void mark_from_roots(vm *vm) {
     if (!vm) return;
 
@@ -76,22 +75,20 @@ static void mark_from_roots(vm *vm) {
     free(worklist);
 }
 
-static void sweep(void) {
-    HeapLinkList *curr = heap_head;
+static void sweep(HeapLinkList **heap_head) {
+    HeapLinkList *curr = *heap_head;   
     HeapLinkList *prev = NULL;
 
     while (curr) {
         HeapObj *obj = curr->node;
 
         if (!obj->marked) {
-            /* Unreachable object: remove from heap */
-            // gc_swept_count++;
             HeapLinkList *garbage = curr;
 
             if (prev == NULL) {
-                /* Removing head */
-                heap_head = curr->next;
-                curr = heap_head;
+                /* removing head */
+                *heap_head = curr->next;   
+                curr = *heap_head;
             } else {
                 prev->next = curr->next;
                 curr = curr->next;
@@ -101,13 +98,14 @@ static void sweep(void) {
             free(garbage);
         }
         else {
-            /* Reachable object: reset mark */
+            /* reachable */
             obj->marked = 0;
             prev = curr;
             curr = curr->next;
         }
     }
 }
+
 
 void gc_run(vm *vm) {
     printf("\n=== GC START ===\n");
@@ -117,15 +115,15 @@ void gc_run(vm *vm) {
     // mark_time += (t2 -t1);
     printf("=== GC END ===\n");  
     // t1 = clock();
-    sweep();
+    sweep(&vm->heap_head);
     // t2 = clock();
-    // sweep_time += (t2 -t1);             
+    // ake _time += (t2 -t1);             
 }
 
-void gc(vm *vm) {
-    // gc_runs++;
+// void gc(vm *vm) {
+//     // gc_runs++;
 
-    // gc_objects_before += heap_count();
-    gc_run(vm);
-    // gc_objects_after += heap_count();
-}
+//     // gc_objects_before += heap_count();
+//     gc_run(vm);
+//     // gc_objects_after += heap_count();
+// }

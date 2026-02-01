@@ -2,8 +2,6 @@
 #include <gc/object.h>
 #include <stdlib.h>
 
-HeapLinkList *heap_head = NULL;
-
 Value value_int(int x) {
     Value v;
     v.type = VAL_INT;
@@ -43,17 +41,18 @@ void print_Value(Value v) {
         printf("NULL");
 }
 
-int heap_add(HeapObj *obj) {
+int heap_add(HeapObj *obj, HeapLinkList **heap_head) {
     HeapLinkList *node = malloc(sizeof(HeapLinkList));
     if (!node) return 1;
 
     node->node = obj;
-    node->next = heap_head;
-    heap_head = node;
+    node->next = *heap_head;
+    *heap_head = node;
     return 0;
 }
 
-int heap_count(void) {
+
+int heap_count(HeapLinkList *heap_head) {
     int count = 0;
     HeapLinkList *curr = heap_head;
     while (curr) {
@@ -61,6 +60,36 @@ int heap_count(void) {
         curr = curr->next;
     }
     return count;
+}
+
+void heap_print_node(HeapLinkList *object, int index){
+    HeapObj *obj = object->node;
+
+    printf("[%d] HeapObj @ %p | Object Name=%s | type=", index, (void *)obj, obj->Objname);
+
+    if (obj->type == OBJ_PAIR) {
+        printf("PAIR | marked=%d\n", obj->marked);
+        printf("     left  = ");
+        print_Value(obj->as.pair.left);
+        printf("\n     right = ");
+        print_Value(obj->as.pair.right);
+        printf("\n");
+    }
+    else if(obj->type == OBJ_FUNC){
+        printf("FUNC | marked=%d\n", obj->marked);
+        printf("     entry  = ");
+        print_Value(obj->as.func.entry);
+        printf("\n");
+    }
+    else if(obj->type == OBJ_CLOSURE){
+        printf("CLOSURE | marked=%d\n", obj->marked);
+        printf("     func  = ");
+        print_Value(obj->as.closure.func);
+        printf("\n     right = ");
+        print_Value(obj->as.closure.env);
+        printf("\n");
+    }
+    printf("------------------------------------------------\n");
 }
 
 void heap_print(HeapLinkList *head) {
@@ -73,39 +102,13 @@ void heap_print(HeapLinkList *head) {
 
     int index = 0;
     while (head) {
-        HeapObj *obj = head->node;
-
-        printf("[%d] HeapObj @ %p | Object Name=%s | type=", index, (void *)obj, obj->Objname);
-
-        if (obj->type == OBJ_PAIR) {
-            printf("PAIR | marked=%d\n", obj->marked);
-            printf("     left  = ");
-            print_Value(obj->as.pair.left);
-            printf("\n     right = ");
-            print_Value(obj->as.pair.right);
-            printf("\n");
-        }
-        else if(obj->type == OBJ_FUNC){
-            printf("FUNC | marked=%d\n", obj->marked);
-            printf("     entry  = ");
-            print_Value(obj->as.func.entry);
-            printf("\n");
-        }
-        else if(obj->type == OBJ_CLOSURE){
-            printf("CLOSURE | marked=%d\n", obj->marked);
-            printf("     func  = ");
-            print_Value(obj->as.closure.func);
-            printf("\n     right = ");
-            print_Value(obj->as.closure.env);
-            printf("\n");
-        }
-        printf("------------------------------------------------\n");
+        heap_print_node(head, index);
         head = head->next;
         index++;
     }
 }
 
-void heap_destroy(void) {
+void heap_destroy(HeapLinkList *heap_head) {
     HeapLinkList *curr = heap_head;
 
     while (curr) {

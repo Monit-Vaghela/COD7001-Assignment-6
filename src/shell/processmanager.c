@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <shell/processManager.h>
+#include <VM/vm.h>
 
 static struct proc_node *proc_list = NULL;
 static int pidCount = 0;
@@ -18,12 +19,16 @@ static const char *proc_state_to_string(enum proc_state state) {
     }
 }
 
-static void free_process_resources(struct process proc){
-    if(proc.ast != NULL){
-        ast_free(proc.ast);
+static void free_process_resources(struct process *proc){
+    if(proc->ast != NULL){
+        ast_free(proc->ast);
     }
-    if(proc.vm != NULL){
-        free(proc.vm);
+    if(proc->map != NULL){
+        free(proc->map);
+    }
+    if(proc->vm != NULL){
+        vm_reset(proc->vm);
+        free(proc->vm);
     }
     // right now we are just clearing vm but
     // we need to check the heap objects in vm
@@ -34,9 +39,9 @@ void print_proc_list() {
     struct proc_node *head = proc_list;
     while (head) {
         printf("PID: %d | Program: %s | State: %s\n",
-               head->proc.pid,
-               head->proc.program_path,
-               proc_state_to_string(head->proc.state));
+            head->proc->pid,
+            head->proc->program_path,
+            proc_state_to_string(head->proc->state));
 
         head = head->next;
     }
@@ -48,7 +53,7 @@ int proc_list_add(const struct process *p) {
     if (!node)
         return -1;
 
-    node->proc = *p;         
+    node->proc = (struct process *)p;        
     node->next = *head;
     *head = node;
 
@@ -59,10 +64,10 @@ struct process *proc_list_find(int pid) {
     struct proc_node *head = proc_list;
     while (head) {
         // printf("HERE\n");
-        if (head->proc.pid == pid){
-            // printf("returning with pid %d\n", head->proc.pid);
-            return &head->proc;
+        if (head->proc->pid == pid){
+            return head->proc;
         }
+
         // printf("Current Pid is %d\n", head->proc.pid);
         head = head->next;
     }
@@ -75,7 +80,7 @@ int proc_list_remove(int pid) {
     struct proc_node *prev = NULL;
 
     while (curr) {
-        if (curr->proc.pid == pid) {
+        if (curr->proc->pid == pid) {
             if (prev)
                 prev->next = curr->next;
             else
@@ -94,8 +99,12 @@ void proc_list_free() {
     struct proc_node **head = &proc_list;
     struct proc_node *curr = *head;
     while (curr) {
+        printf("Killing process %d\n", curr->proc->pid);
         struct proc_node *next = curr->next;
+        free_process_resources(curr->proc);
+        free(curr->proc);
         free(curr);
+
         curr = next;
     }
     *head = NULL;
@@ -120,10 +129,10 @@ struct process *process_create(const char *program_path) {
     p->ast = NULL;
     p->ir = NULL;
     p->vm = NULL;
-    p->mem_ctx = NULL;
     p->map = NULL;
     p->map_count = 0;
     p->max_pc = 0;
+    p->lines = 0;
     p->exit_code = 0;
     return p;
 }

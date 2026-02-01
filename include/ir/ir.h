@@ -8,6 +8,7 @@ char *get_ir_buf(void);
 
 int *get_line_numbers(void);
 int get_instruction_count(void);
+int get_last_line(void);
 
 ast_node **get_ast_roots(void);
 

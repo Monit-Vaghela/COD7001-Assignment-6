@@ -16,6 +16,7 @@ static int ir_error = 0;
 static int *line_numbers = NULL;
 static int line_count = 0;
 static int line_cap = 0;
+static int last_line = -1;
 
 static ast_node **ast_roots = NULL;
 static ast_node *current_ast_root = NULL;
@@ -38,6 +39,10 @@ int get_instruction_count() {
 
 ast_node **get_ast_roots() {
     return ast_roots;
+}
+
+int get_last_line() {
+    return last_line;
 }
 
 static void ir_init(void)
@@ -151,7 +156,7 @@ static void gen(ast_node *node)
     if (!node) return;
 
     int line = node->dbg.line;
-
+    if(line > last_line) last_line = line;
     switch (node->type)
     {
         case AST_INT:
@@ -179,10 +184,9 @@ static void gen(ast_node *node)
             
                 case '<': emit_tracked(line, "LT\n"); break;
                 case '>': emit_tracked(line, "GT\n"); break;
-                case 'L': emit_tracked(line, "CMP 2\n"); break;
-                case 'G': emit_tracked(line, "CMP 3\n"); break;
+                case 'L': emit_tracked(line, "LE\n"); break;
+                case 'G': emit_tracked(line, "GE\n"); break;
                 case 'E': emit_tracked(line, "EQ\n"); break;
-                case 'N': emit_tracked(line, "CMP 5\n"); break;
             }
             break;
         
@@ -381,8 +385,8 @@ char *generate_ir(ast_node *root)
         fprintf(stderr, "IR generation failed due to errors.\n");
         return NULL;
     }
-    
-    emit_tracked(7, "HALT\n");
+    last_line++;
+    emit_tracked(last_line , "HALT\n");
     return ir_buf;
 }
 
@@ -393,6 +397,7 @@ void reset_ir_state(void)
     var_count = 0;
     current_scope = 0;
     ir_error = 0;
+    last_line = -1;
     current_ast_root = NULL;
     
     if (ir_buf) {

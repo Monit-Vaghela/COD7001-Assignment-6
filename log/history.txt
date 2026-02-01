@@ -550,3 +550,120 @@ exit
 submit tests/test5.am
 run 1
 exit
+submit tests/test5.am
+run 1
+exit
+submit tests/test5.am
+run 1
+debug 1
+exit
+submit tests/test1.am
+run 1
+debug 1
+submit tests/test5.am
+run 2
+debug 2
+exit
+submit tests/test1.am
+exit
+submit tests/test5.am
+run 1
+debug 1
+exit
+submit tests/test5.am
+run 1
+debug 1
+submit tests.test5.am
+submit tests/test5.am
+run 2
+debug 2
+exit
+submit tests/test5.am
+debug 1
+exit
+submit tests/test5.am
+run 1
+memstat 1
+exit
+submit tests/test1.am
+run 1
+memstat 1
+submit tests/test5.am
+run 2
+memstat 2
+gc 2
+memstat 2
+exit
+submit tests/test1.am
+run 1
+debug 1
+exit
+submit tests/test1.am
+proc_info
+exit
+submit tests/test5.am
+run 1
+debug_code
+debug 1
+submit tests/test1.am
+run 1
+debug 1
+exit
+submit
+submit 
+submit tests/test1.am
+run
+run 1
+debug
+debug 1
+exit
+submit tests/test1.am
+run 1
+debug 1
+exit
+submit tests/test1.am
+run 1
+debug 1
+gc 1
+exit
+submit tests/test1.am
+submit tests/test5.am
+exit
+submit tests/test5.am
+submit tests/test6.am
+submit tests/test7.am
+run 1
+run 2
+debug 2
+run 3
+debug 3
+kill 1
+kiil 2
+kill 2
+kill 3
+kill 0
+exit
+submit tests/test9.am
+run 1
+debug 1
+gc 2
+gc 1
+debug 1
+exit
+submit tests/test9.am
+debug 1
+memstat 1
+gc 1
+memstat 1
+debug 1
+exit
+submit tests/test1.am
+run 1
+memstat
+memstat 1
+submit tests/test10.am
+memstat 2
+run 2
+memstat 2
+quit
+exit

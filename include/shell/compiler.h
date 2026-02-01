@@ -4,6 +4,7 @@
 #include "shell/processManager.h"
 #include <stdbool.h>
 
-int compile(struct process *proc, bool dg);
+int compile(struct process *proc);
+int run(struct process *proc, bool dg);
 
 #endif /* BUILTINS_H */
