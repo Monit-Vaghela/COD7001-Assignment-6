@@ -11,6 +11,7 @@ static int ir_size;
 static int ir_cap;
 
 static int label_id = 0;
+static int ir_error = 0;  
 
 /* Line number tracking */
 static int *line_numbers = NULL;
@@ -26,7 +27,6 @@ char *get_ir_buf(){
 }
 
 int *get_line_numbers() {
-    //printf("Called\n");
     return line_numbers;
 }
 
@@ -69,8 +69,9 @@ static int lookup_slot(const char *name)
             return vars[i].slot;
         }
     }
-    printf("IR error: variable '%s' not found\n", name);
-    exit(1);
+    fprintf(stderr, "IR error: variable '%s' not found\n", name);
+    ir_error = 1; 
+    return 0;     
 }
 
 static int create_slot(const char *name)
@@ -154,13 +155,16 @@ static void gen(ast_node *node)
 
         case AST_IDENT: {
             int slot = lookup_slot(node->name);
+            if (ir_error) return;  
             emit_tracked(line, "LOAD %d\n", slot);
             break;
         }
         
         case AST_BINOP:
             gen(node->left);
-            gen(node->right);   
+            if (ir_error) return; 
+            gen(node->right);
+            if (ir_error) return; 
             
             switch (node->op) {
                 case '+': emit_tracked(line, "ADD\n"); break;
@@ -184,9 +188,11 @@ static void gen(ast_node *node)
             emit("L%d:\n", start);
 
             gen(node->left);
+            if (ir_error) return;  
             emit_tracked(line, "JZ L%d\n", end);
 
             gen(node->right);
+            if (ir_error) return;  
             emit_tracked(line, "JMP L%d\n", start);
 
             emit("L%d:\n", end);
@@ -198,6 +204,7 @@ static void gen(ast_node *node)
             int slot = create_slot(node->name);
             if (node->left) {
                 gen(node->left);
+                if (ir_error) return; 
                 emit_tracked(line, "STORE %d\n", slot);
             }
             else {
@@ -209,7 +216,9 @@ static void gen(ast_node *node)
 
         case AST_ASSIGN: {
             int slot = lookup_slot(node->name);
+            if (ir_error) return;  
             gen(node->left);
+            if (ir_error) return;  
             emit_tracked(line, "STORE %d\n", slot);
             break;
         }
@@ -218,9 +227,11 @@ static void gen(ast_node *node)
             int end = new_label();
 
             gen(node->left);
+            if (ir_error) return; 
             emit_tracked(line, "JZ L%d\n", end);
 
             gen(node->right);
+            if (ir_error) return; 
             emit("L%d:\n", end);
             break;
         }
@@ -230,13 +241,16 @@ static void gen(ast_node *node)
             int end_lbl  = new_label();
 
             gen(node->left);
+            if (ir_error) return; 
             emit_tracked(line, "JZ L%d\n", else_lbl);
 
             gen(node->right);
+            if (ir_error) return; 
             emit_tracked(line, "JMP L%d\n", end_lbl);
 
             emit("L%d:\n", else_lbl);
             gen(node->extra);
+            if (ir_error) return; 
 
             emit("L%d:\n", end_lbl);
             break;
@@ -248,6 +262,10 @@ static void gen(ast_node *node)
             ast_node *stmt = node->left;
             while (stmt) {
                 gen(stmt);
+                if (ir_error) {
+                    current_scope--;
+                    return;
+                }
                 if (stmt->type == AST_IF ||
                     stmt->type == AST_IF_ELSE ||
                     stmt->type == AST_WHILE ||
@@ -276,8 +294,17 @@ static void gen(ast_node *node)
 
 char *generate_ir(ast_node *root)
 {
+    if (!root) return NULL;
+    
     ir_init();
+    ir_error = 0;
     gen(root);
+    
+    if (ir_error) { 
+        fprintf(stderr, "IR generation failed due to errors.\n");
+        return NULL;
+    }
+    
     emit_tracked(7, "HALT\n");
     return ir_buf;
 }
@@ -288,6 +315,7 @@ void reset_ir_state(void)
     next_slot = 0;
     var_count = 0;
     current_scope = 0;
+    ir_error = 0; 
     
     // Free and reset buffers
     if (ir_buf) {
