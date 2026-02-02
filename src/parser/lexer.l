@@ -27,6 +27,7 @@ WHITESPACE [ \t\r\n]+
 "var" { yylval.lineno = yylineno; return VAR; }
 "obj" { yylval.lineno = yylineno; return OBJ; }
 "new" { yylval.lineno = yylineno; return NEW; }
+"print" { yylval.lineno = yylineno; return PRINT;}
 "if" { yylval.lineno = yylineno; return IF; }
 "else" { yylval.lineno = yylineno; return ELSE; }
 "while" { yylval.lineno = yylineno; return WHILE; }

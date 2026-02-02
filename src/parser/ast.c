@@ -116,6 +116,12 @@ ast_node *ast_make_obj_decl(char *name, ast_node *expr, int line) {
     return node;
 }
 
+ast_node *ast_make_print(ast_node *expr, int line) {
+    ast_node *node = ast_create_empty_node(AST_PRINT, line);
+    node->left = expr;
+    return node;
+}
+
 ast_node *ast_make_if(ast_node *cond, ast_node *then_block, int line) {
     /*
     Inputs :
@@ -318,6 +324,13 @@ void ast_print(ast_node *node, int indent)
                 ast_print(node->left, indent + 1);
             break;
 
+        case AST_PRINT:
+            printf("PRINT");
+            print_dbg(node);
+            printf("\n");
+            ast_print(node->left, indent + 1);
+            break;
+
         case AST_NEW:
             printf("NEW");
             print_dbg(node);
@@ -405,6 +418,7 @@ void ast_print(ast_node *node, int indent)
     if ((node->type == AST_VAR_DECL ||
          node->type == AST_OBJ_DECL ||
          node->type == AST_ASSIGN ||
+         node->type == AST_PRINT ||
          node->type == AST_OBJ_SET_LEFT ||
          node->type == AST_OBJ_SET_RIGHT ||
          node->type == AST_OBJ_REMOVE_LEFT ||

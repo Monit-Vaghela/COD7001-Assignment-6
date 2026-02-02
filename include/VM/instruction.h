@@ -44,7 +44,9 @@ typedef enum {
 
     BREAK = 0xCC,
     
-    HALT  = 0xFF
+    HALT  = 0xFF,
+
+    PRINT = 0x80
 } opcode;
 
 char *opcode_to_string(unsigned char op);

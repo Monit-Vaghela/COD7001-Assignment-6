@@ -39,7 +39,7 @@ void yyerror(const char *s);
     int lineno;
 }
 
-%token <lineno> VAR IF ELSE WHILE OBJ NEW
+%token <lineno> VAR IF ELSE WHILE OBJ NEW PRINT
 %token <sval> IDENTIFIER
 %token <ival> INTEGER
 
@@ -57,6 +57,7 @@ void yyerror(const char *s);
 %type <node> stmt stmt_list block
 %type <node> variable_decl obj_decl assignment
 %type <node> obj_operation
+%type <node> print_stmt
 %type <node> if_stmt while_stmt
 %type <node> expression equality comparison term factor unary primary
 
@@ -91,6 +92,7 @@ stmt:
     | obj_decl { $$ = $1; }
     | assignment  { $$ = $1; }
     | obj_operation { $$ = $1; }
+    | print_stmt { $$ = $1; }
     | if_stmt     { $$ = $1; }
     | while_stmt  { $$ = $1; }
     | block       { $$ = $1; }
@@ -264,6 +266,30 @@ obj_operation:
 
         $$ = ast_make_obj_remove_right($1, yylineno);
         INIT_DBG($$);
+    }
+    ;
+
+print_stmt:
+    PRINT IDENTIFIER SEMI
+    {
+        if (!lookup_symbol($2)) {
+            fprintf(stderr, "Error at line %d: variable '%s' not declared\n", $1, $2);
+            semantic_error = 1;
+        }
+
+        ast_node *ident = ast_make_ident($2, $1);
+        ident->dbg.line = $1;
+        ident->dbg.scope_id = get_current_scope();
+        ident->dbg.var_id = -1;
+        ident->dbg.control_id = -1;
+        ident->dbg.alloc_site_id = -1;
+
+        $$ = ast_make_print(ident, $1);
+        $$->dbg.line = $1;
+        $$->dbg.scope_id = get_current_scope();
+        $$->dbg.var_id = -1;
+        $$->dbg.control_id = -1;
+        $$->dbg.alloc_site_id = -1;
     }
     ;
 

@@ -16,6 +16,7 @@ typedef enum {
     AST_VAR_DECL,
     AST_OBJ_DECL,
     AST_ASSIGN,
+    AST_PRINT,
     AST_IF,
     AST_IF_ELSE,
 
@@ -54,6 +55,7 @@ ast_node *ast_make_ident(char *name, int line);
 ast_node *ast_make_binop(char op, ast_node *left, ast_node *right, int line);
 
 ast_node *ast_make_assign(char *name, ast_node *expr, int line);
+ast_node *ast_make_print(ast_node *expr, int line);
 ast_node *ast_make_var_decl(char *name, ast_node *expr, int line);
 ast_node *ast_make_obj_decl(char *name, ast_node *expr, int line);
 

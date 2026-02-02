@@ -32,43 +32,43 @@ int parse_file(const char *filename)
         return 1;
     }
     
-    // printf("\nAST:\n");
-    // printf("====\n");
-    // ast_print(ast_root, 0);
+    printf("\nAST:\n");
+    printf("====\n");
+    ast_print(ast_root, 0);
     
-    // printf("\n\nGenerated IR:\n");
-    // printf("=============\n");
+    printf("\n\nGenerated IR:\n");
+    printf("=============\n");
     
-    // char *ir_code = generate_ir(ast_root);
+    char *ir_code = generate_ir(ast_root);
     
-    // if (!ir_code) {
-    //     fprintf(stderr, "IR generation aborted due to errors.\n");
-    //     fclose(yyin);
-    //     return 1;
-    // }
+    if (!ir_code) {
+        fprintf(stderr, "IR generation aborted due to errors.\n");
+        fclose(yyin);
+        return 1;
+    }
     
-    // printf("%s\n", ir_code);
+    printf("%s\n", ir_code);
     
-    // int *lines = get_line_numbers();
-    // ast_node **roots = get_ast_roots();
-    // int count = get_instruction_count();
+    int *lines = get_line_numbers();
+    ast_node **roots = get_ast_roots();
+    int count = get_instruction_count();
     
-    // printf("\nLine Number Mapping:\n");
-    // printf("====================\n");
-    // printf("Array: [");
-    // for (int i = 0; i < count; i++) {
-    //     printf("%d", lines[i]);
-    //     if (i < count - 1) printf(", ");
-    // }
-    // printf("]\n");
-    // printf("Total instructions: %d\n", count);
+    printf("\nLine Number Mapping:\n");
+    printf("====================\n");
+    printf("Array: [");
+    for (int i = 0; i < count; i++) {
+        printf("%d", lines[i]);
+        if (i < count - 1) printf(", ");
+    }
+    printf("]\n");
+    printf("Total instructions: %d\n", count);
     
-    // FILE *out = fopen("output.asm", "w");
-    // if (out) {
-    //     fprintf(out, "%s", ir_code);
-    //     fclose(out);
-    //     printf("\nIR saved to: output.asm\n");
-    // }
+    FILE *out = fopen("output.asm", "w");
+    if (out) {
+        fprintf(out, "%s", ir_code);
+        fclose(out);
+        printf("\nIR saved to: output.asm\n");
+    }
     
     fclose(yyin);
     return 0;

@@ -667,3 +667,8 @@ run 2
 memstat 2
 quit
 exit
+submit tests/test11.am
+make clean
+make
+./myShell
+exit

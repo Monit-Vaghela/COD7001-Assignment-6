@@ -303,6 +303,13 @@ static void gen(ast_node *node)
             break;
         }
 
+        case AST_PRINT: {
+            gen(node->left);
+            if (ir_error) return;
+            emit_tracked(line, "PRINT\n");
+            break;
+        }
+
         case AST_IF: {
             int end = new_label();
 
