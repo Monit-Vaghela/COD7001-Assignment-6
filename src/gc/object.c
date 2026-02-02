@@ -9,7 +9,7 @@ static int closure_counter = 1;
 HeapObj *new_pair(HeapLinkList **heap_head, Value left, Value right) {
     HeapObj *obj = heap_alloc();
     obj->type = OBJ_PAIR;
-
+    obj->used = 0;
     sprintf(obj->Objname, "P%d", pair_counter++);
 
     obj->as.pair.left = left;

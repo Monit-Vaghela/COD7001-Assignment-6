@@ -5,6 +5,7 @@
 
 int heap_add(HeapObj *obj, HeapLinkList **heap_head);
 int heap_count(HeapLinkList *heap_head);
+void heap_get_leaks(HeapLinkList *heap_head);
 
 HeapObj *heap_alloc(void);
 

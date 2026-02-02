@@ -238,7 +238,9 @@ int assemble(const char *src, unsigned char **out_code) {
                 emit_u8(&code, &size, &capacity, REMOVE_LEFT);
             } else if (!strcmp(instr, "REMOVE_RIGHT")) {
                 emit_u8(&code, &size, &capacity, REMOVE_LEFT);
-            } else if (!strcmp(instr, "HALT")) {
+            }else if (!strcmp(instr, "PRINT")) {
+                emit_u8(&code, &size, &capacity, PRINT);
+            }else if (!strcmp(instr, "HALT")) {
                 emit_u8(&code, &size, &capacity, HALT);
             } else {
                 printf("[Assembler Error] Unknown instruction: %s\n", instr);

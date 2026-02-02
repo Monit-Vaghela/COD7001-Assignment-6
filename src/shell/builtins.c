@@ -145,6 +145,23 @@ static int garbage_collection(struct base_command *cmd){
 static int leaks_check(struct base_command *cmd){
     // to perform leak check, perform mark algo only, and
     // print out the unreachable objects
+    if(cmd->argc > 2 || cmd->argc < 2) {
+        printf("Usage: %s <id>\n", cmd->argv[0]);
+        return 0;
+    }
+
+    int id = check_pid(cmd->argv[1], "run");
+    if(id == -1) return 0;
+
+    //first we find the PID
+    struct process *proc = proc_list_find(id);
+    if(proc == NULL){
+        printf("No Process with pid %d\n", id);
+        return 0;
+    }
+
+    heap_get_leaks(proc->vm->heap_head);
+    // now we print the elements that are not marked 
     return 0;
 }
 

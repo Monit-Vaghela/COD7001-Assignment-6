@@ -39,7 +39,10 @@ char *opcode_to_string(unsigned char op) {
 
         case GC: return "GC";
 
+        case PRINT: return "PRINT";
+
         case BREAK: return "BREAK";
+        
         case HALT:  return "HALT";
 
         default: return "UNKNOWN";

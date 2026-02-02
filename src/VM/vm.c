@@ -674,7 +674,7 @@ int vm_run(vm *vm, int debug, int benchmark, int stepSize) {
                 // Assign b to left of a
 
                 a.obj->as.pair.left = b;
-                
+                a.obj->used = 1;
                 if(stack_push(&vm->stack, a) != 0){
                     printf("[VM Error / %d]: Stack is Full Cannot Push\n", vm->pc);
                     vm->running = 0;
@@ -706,7 +706,7 @@ int vm_run(vm *vm, int debug, int benchmark, int stepSize) {
                 // Assign b to left of a
 
                 a.obj->as.pair.right = b;
-                
+                a.obj->used = 1;
                 if(stack_push(&vm->stack, a) != 0){
                     printf("[VM Error / %d]: Stack is Full Cannot Push\n", vm->pc);
                     vm->running = 0;
@@ -735,7 +735,7 @@ int vm_run(vm *vm, int debug, int benchmark, int stepSize) {
                     printf("[VM Error / %d]: Referencing Null Pointer\n", vm->pc);
                 }
                 Value left = a.obj->as.pair.left;
-
+                a.obj->used = 1;
                 if(stack_push(&vm->stack, left) != 0){
                     printf("[VM Error / %d]: Stack is Full Cannot Push\n", vm->pc);
                     vm->running = 0;
@@ -764,7 +764,7 @@ int vm_run(vm *vm, int debug, int benchmark, int stepSize) {
                     printf("[VM Error / %d]: Referencing Null Pointer\n", vm->pc);
                 }
                 Value right = a.obj->as.pair.right;
-
+                a.obj->used = 1;
                 if(stack_push(&vm->stack, right) != 0){
                     printf("[VM Error / %d]: Stack is Full Cannot Push\n", vm->pc);
                     vm->running = 0;
@@ -890,6 +890,11 @@ int vm_run(vm *vm, int debug, int benchmark, int stepSize) {
 
             case CALL_CLOSURE:{
                 Value a = stack_pop(&vm->stack);
+                if(stck_error_flag){
+                    printf("[VM Error / %d]: Stack Is Empty Cannot Pop\n", vm->pc);
+                    vm->running = 0;
+                    break;
+                }
 
                 // Check of HeapObj
                 if(a.type != VAL_OBJ){
@@ -937,6 +942,25 @@ int vm_run(vm *vm, int debug, int benchmark, int stepSize) {
                 return 101;
             }
 
+            case PRINT: {
+                Value a = stack_pop(&vm->stack);
+                if(stck_error_flag){
+                    printf("[VM Error / %d]: Stack Is Empty Cannot Pop\n", vm->pc);
+                    vm->running = 0;
+                    break;
+                }
+
+                // check if a is INT
+                if(a.type != VAL_INT){
+                    printf("[VM ERROR / %d] Top Of stack must be VAL_INT to print\n", vm->pc);
+                    vm->running = 0;
+                    break;
+                }
+
+                printf("%d\n", a.int_value);
+                vm->pc++;
+                break;
+            }
             case HALT:{
                 vm->running = 0;
                 break;

@@ -15,7 +15,7 @@ typedef struct HeapObj {
     HeapObjType type;
     char Objname[16];
     int marked;
-
+    int used;
     union {
         struct {
             Value left;

@@ -42,7 +42,7 @@ static void push_children(HeapObj *obj, HeapObj **worklist, int *top) {
     }
 }
 
-static void mark_from_roots(vm *vm) {
+void mark_from_roots(vm *vm) {
     if (!vm) return;
 
     int capacity = 1024;
@@ -105,7 +105,6 @@ static void sweep(HeapLinkList **heap_head) {
         }
     }
 }
-
 
 void gc_run(vm *vm) {
     printf("\n=== GC START ===\n");

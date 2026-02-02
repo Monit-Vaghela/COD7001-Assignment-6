@@ -12,6 +12,7 @@ static int allow_break(struct process *proc, int instruction_line){
         case STORE: return 0;
         case LOAD:  return 0;
 
+        case PRINT: return 0;
         default: return 1;
     }
 }
@@ -168,7 +169,7 @@ int debug(struct process *proc) {
                 continue;
             }
             if(allow_break(proc, lineno) != 0){
-                print_error("Break points are only allowed on certain instructions (try PUSH POP LOAD STORE)\n");
+                print_error("Break points are only allowed on certain instructions (try PUSH POP LOAD STORE PRINT)\n");
                 continue;
             }
             // Only allow break points on PUSH, POP, LOAD, STORE

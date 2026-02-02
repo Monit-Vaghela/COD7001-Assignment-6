@@ -672,3 +672,16 @@ make clean
 make
 ./myShell
 exit
+submit tests/test11.am
+exit
+submit tests/test11.am
+run 1
+kill 1
+quit
+exit
+submit tests/tests12.am
+run 1
+debug 1
+submit tests/test12.am
+submit tests/test12.am
+exit

@@ -62,13 +62,33 @@ int heap_count(HeapLinkList *heap_head) {
     return count;
 }
 
+void heap_get_leaks(HeapLinkList *heap_head) {
+    int leaked_bytes = 0;
+    int count = 0;
+    HeapLinkList *curr = heap_head;
+    while (curr) {
+        if(curr->node->used == 0){
+            int bytes;
+            if(curr->node->type == VAL_INT || curr->node->type == VAL_NULL) bytes = 16;
+            else if(curr->node->type == VAL_OBJ) bytes = 64;
+            else bytes = 0;
+            leaked_bytes += bytes;
+            count += 1;
+        }
+        curr = curr->next;
+    }
+    printf("Number of Leaked Objects | %d\n", count);
+    printf("Leaked Bytets              %d\n", leaked_bytes);
+    
+}
+
 void heap_print_node(HeapLinkList *object, int index){
     HeapObj *obj = object->node;
 
     printf("[%d] HeapObj @ %p | Object Name=%s | type=", index, (void *)obj, obj->Objname);
 
     if (obj->type == OBJ_PAIR) {
-        printf("PAIR | marked=%d\n", obj->marked);
+        printf("PAIR | marked=%d  | used=%d\n", obj->marked, obj->used);
         printf("     left  = ");
         print_Value(obj->as.pair.left);
         printf("\n     right = ");
@@ -76,13 +96,13 @@ void heap_print_node(HeapLinkList *object, int index){
         printf("\n");
     }
     else if(obj->type == OBJ_FUNC){
-        printf("FUNC | marked=%d\n", obj->marked);
+        printf("FUNC | marked=%d  | used=%d\n", obj->marked, obj->used);
         printf("     entry  = ");
         print_Value(obj->as.func.entry);
         printf("\n");
     }
     else if(obj->type == OBJ_CLOSURE){
-        printf("CLOSURE | marked=%d\n", obj->marked);
+        printf("CLOSURE | marked=%d  | used=%d\n", obj->marked, obj->used);
         printf("     func  = ");
         print_Value(obj->as.closure.func);
         printf("\n     right = ");

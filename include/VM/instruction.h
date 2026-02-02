@@ -41,12 +41,12 @@ typedef enum {
     CALL_CLOSURE = 0x62,
 
     GC = 0x70,
+    
+    PRINT = 0x80,
 
     BREAK = 0xCC,
     
-    HALT  = 0xFF,
-
-    PRINT = 0x80
+    HALT  = 0xFF
 } opcode;
 
 char *opcode_to_string(unsigned char op);
