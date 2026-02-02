@@ -1,0 +1,9 @@
+var a = 1;
+var b = 2;
+
+if(a < b){
+    var a = 3;
+    print a;
+}else{
+    print b;
+}

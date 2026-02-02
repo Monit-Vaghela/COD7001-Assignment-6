@@ -31,6 +31,7 @@ int compile(struct process *proc){
         // printf("Process State %d\n", proc->state);
         if(parse_file(proc->program_path) != 0){
             proc->exit_code = 1;
+            proc->state = PROC_TERMINATED;
             return 0;
         }
         proc->ast= ast_root;
@@ -41,6 +42,7 @@ int compile(struct process *proc){
             fprintf(stderr, "IR generation aborted due to errors.\n");
             fclose(yyin);
             proc->exit_code = 2;
+            proc->state = PROC_TERMINATED;
             return 0;
         }
 
@@ -67,6 +69,7 @@ int compile(struct process *proc){
         // printf("DONE ASSEMBLING, %d\n", res);
         if(res == -1){
             proc->exit_code = 4;
+            proc->state = PROC_TERMINATED;
             return 0;
         }
         // print the program code

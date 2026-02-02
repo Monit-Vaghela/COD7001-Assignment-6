@@ -1,4 +1,0 @@
-var x = 10;
-obj a = new;
-a.set_left = x;
-var b = a.get_right;

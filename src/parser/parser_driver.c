@@ -23,6 +23,7 @@ int parse_file(const char *filename)
         return 1;
     }
 
+    symtab_cleanup();
     symtab_init();
     yyparse();
     

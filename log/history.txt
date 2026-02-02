@@ -685,3 +685,109 @@ debug 1
 submit tests/test12.am
 submit tests/test12.am
 exit
+clear
+submit tests/test12.am
+submit tests/tests12.am
+run 1
+memstat 1
+leaks
+leaks 1
+git add .
+git push origin main
+exit
+clear
+submit tests/test1.am
+run 1
+debug 1
+clear
+submit tests/test5.am
+submit tests/test7.am
+run 3
+memstat 3
+run 2
+debug 1
+clear
+submit tests/test12.am
+submit tests/tests12.am
+run 1
+memstat
+proc_info
+run 4
+memstat
+memstat 4
+leaks 4
+kill 4
+quit
+exit
+submit tests11.am
+submit tests/tests11.am
+clear
+submit tests/test11.am
+run 1
+exit
+submit tests/test1.am
+run 1
+debu 1
+debug 
+debug 1
+exit
+submit tests/valid/basic.lang
+exit
+submit tests/valid/basic.lang
+run 1
+quit
+submit tests/valid/loop.lang
+run 2
+submit tests/valid/scope.lang
+run 2
+run 3
+proc_info
+run 3
+kill 3
+submit tests/valid/scope.lang
+run 4
+submit tests/valid/scope.lang
+run 5
+submit tests/valid/object.lanf
+submit test/valid/object.lang
+submit tests/valid/object.lang
+proc_info
+kill 6
+submit tests/valid/object.lang
+quit
+eiuxt
+exit
+submit tests/valid/object.lang
+run 1
+submit tests/valid/object2.lang
+run 2
+memstat 2
+submit tests/valid/stress.lang
+proc_info
+run 3
+memstat 3
+leaks 3
+gc 3
+memstat
+memstat 3
+submit tests/valid/array.lang
+run 4
+memstat
+memstat 4
+submit tests/valid/array.lang
+submit tests/invalid/scope.lang
+submit tests/invalid/scope.lang
+submit tests/invalid/parseError1.lang
+submit tests/valid/basic.lang
+eixt
+exit
+submit tests/Invalid/scope.lang
+submit tests/Invalid/vmError.lang
+submit tests/Invalid/vmError.lang
+run 2
+exit
+submit tests/Invalid/scope.lang
+submit tests/valid/basic.lang
+run 1
+run 2
+exit

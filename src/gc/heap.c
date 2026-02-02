@@ -69,9 +69,22 @@ void heap_get_leaks(HeapLinkList *heap_head) {
     while (curr) {
         if(curr->node->used == 0){
             int bytes;
-            if(curr->node->type == VAL_INT || curr->node->type == VAL_NULL) bytes = 16;
-            else if(curr->node->type == VAL_OBJ) bytes = 64;
-            else bytes = 0;
+            switch (curr->node->type)
+            {
+            case VAL_INT:
+            case VAL_NULL:
+                bytes = 16;
+                break;
+            
+            case VAL_OBJ:
+                bytes = 64;
+                break;
+            
+            default:
+                bytes = 0;
+                break;
+            }
+            
             leaked_bytes += bytes;
             count += 1;
         }

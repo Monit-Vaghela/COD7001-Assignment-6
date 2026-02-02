@@ -1,5 +1,5 @@
 var x = 10;
 obj a = new;
 a.set_left = x;
-obj b = new;
-b.set_left = a;
+var b = a.get_left;
+print b;

@@ -191,8 +191,8 @@ int handle_builtin(struct base_command *cmd) {
         const char *dot = strrchr(cmd->argv[1], '.');
         if (!dot || dot == cmd->argv[1])
             return 0;
-        if(strcmp(dot, ".am") != 0){
-            printf("Submit only accepts .am extenstions\n");
+        if(strcmp(dot, ".lang") != 0){
+            printf("Submit only accepts .lang extenstions\n");
             return 0;
         }
 
